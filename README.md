@@ -3,11 +3,12 @@
 ![](./assets/images/logo.256.png)
 
 > 🚧 [WIP] This app is a work in progress, and only basic features are implemented.
+
 > 🤖 [Vibe Project] The vast majority of the code was implemented by Cursor.
 
 **Mobile App for OpenCode and more**
 
-OpenMode is a mobile client for OpenCode cli, designed to bring AI-powered development tools directly to your mobile device. Built with Flutter, it provides a seamless and intuitive interface for interacting with AI assistants, managing code projects, and enhancing your development workflow on the go.
+OpenMode is a mobile client for OpenCode cli (and more, maybe). Built with Flutter, it provides a seamless and intuitive interface for interacting with AI assistants, managing code projects, and enhancing your development workflow on the go.
 
 ## ✨ Features
 
