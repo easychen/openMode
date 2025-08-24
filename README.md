@@ -8,7 +8,7 @@
 
 **Mobile App for OpenCode and more**
 
-OpenMode is a mobile client for OpenCode cli, designed to bring AI-powered development tools directly to your mobile device. Built with Flutter, it provides a seamless and intuitive interface for interacting with AI assistants, managing code projects, and enhancing your development workflow on the go.
+OpenMode is a mobile client for OpenCode cli (and more, maybe). Built with Flutter, it provides a seamless and intuitive interface for interacting with AI assistants, managing code projects, and enhancing your development workflow on the go.
 
 ## ✨ Features
 
