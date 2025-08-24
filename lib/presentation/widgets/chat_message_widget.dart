@@ -376,7 +376,7 @@ class ChatMessageWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
-      constraints: const BoxConstraints(maxHeight: 900),
+      constraints: const BoxConstraints(maxHeight: 600),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
         borderRadius: BorderRadius.circular(8),
@@ -489,7 +489,7 @@ class ChatMessageWidget extends StatelessWidget {
               Container(
                 margin: const EdgeInsets.only(top: 8),
                 padding: const EdgeInsets.all(8),
-                constraints: const BoxConstraints(maxHeight: 900),
+                constraints: const BoxConstraints(maxHeight: 600),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(4),
@@ -509,7 +509,7 @@ class ChatMessageWidget extends StatelessWidget {
         final errorState = state as ToolStateError;
         return Container(
           padding: const EdgeInsets.all(8),
-          constraints: const BoxConstraints(maxHeight: 900),
+          constraints: const BoxConstraints(maxHeight: 600),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(4),
