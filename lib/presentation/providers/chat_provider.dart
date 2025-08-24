@@ -292,10 +292,24 @@ class ChatProvider extends ChangeNotifier {
   void _updateOrAddMessage(ChatMessage message) {
     final index = _messages.indexWhere((m) => m.id == message.id);
     if (index != -1) {
+      // 更新现有消息
       _messages[index] = message;
+      print('🔄 更新消息: ${message.id}, 部件数量: ${message.parts.length}');
     } else {
+      // 添加新消息
       _messages.add(message);
+      print('➕ 添加新消息: ${message.id}, 角色: ${message.role}');
     }
+
+    // 检查是否有未完成的助手消息
+    if (message is AssistantMessage) {
+      print('🤖 助手消息状态: ${message.isCompleted ? "已完成" : "进行中"}');
+      if (message.isCompleted && _state == ChatState.sending) {
+        print('✅ 消息完成，更新状态为已加载');
+        _setState(ChatState.loaded);
+      }
+    }
+
     notifyListeners();
 
     // 触发自动滚动

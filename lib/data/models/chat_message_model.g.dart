@@ -27,9 +27,7 @@ ChatMessageModel _$ChatMessageModelFromJson(Map<String, dynamic> json) =>
           ? null
           : MessageErrorModel.fromJson(json['error'] as Map<String, dynamic>),
       mode: json['mode'] as String?,
-      system: (json['system'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      system: ChatMessageModel._systemFromJson(json['system']),
       path: ChatMessageModel._pathFromJson(json['path']),
     );
 
@@ -86,9 +84,9 @@ Map<String, dynamic> _$MessagePartModelToJson(MessagePartModel instance) =>
 
 MessageTokensModel _$MessageTokensModelFromJson(Map<String, dynamic> json) =>
     MessageTokensModel(
-      input: (json['input'] as num).toInt(),
-      output: (json['output'] as num).toInt(),
-      total: (json['total'] as num).toInt(),
+      input: MessageTokensModel._intFromJson(json['input']),
+      output: MessageTokensModel._intFromJson(json['output']),
+      total: MessageTokensModel._intFromJson(json['total']),
     );
 
 Map<String, dynamic> _$MessageTokensModelToJson(MessageTokensModel instance) =>

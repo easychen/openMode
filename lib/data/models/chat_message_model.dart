@@ -11,6 +11,7 @@ class ChatMessageModel {
     required this.sessionId,
     required this.role,
     required this.time,
+    this.completedTime,
     this.parts = const [],
     this.providerId,
     this.modelId,
@@ -28,6 +29,8 @@ class ChatMessageModel {
   final String role;
   @JsonKey(fromJson: _timeFromJson)
   final DateTime time;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final DateTime? completedTime;
 
   static DateTime _timeFromJson(dynamic value) {
     if (value is Map<String, dynamic>) {
@@ -47,6 +50,17 @@ class ChatMessageModel {
     return DateTime.now();
   }
 
+  static DateTime? _completedTimeFromJson(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      // 处理 {"created": number, "completed": number} 格式
+      final completed = value['completed'] as int?;
+      if (completed != null && completed > 0) {
+        return DateTime.fromMillisecondsSinceEpoch(completed);
+      }
+    }
+    return null;
+  }
+
   final List<MessagePartModel> parts;
   @JsonKey(name: 'providerID')
   final String? providerId;
@@ -56,9 +70,24 @@ class ChatMessageModel {
   final MessageTokensModel? tokens;
   final MessageErrorModel? error;
   final String? mode;
+  @JsonKey(fromJson: _systemFromJson)
   final List<String>? system;
   @JsonKey(fromJson: _pathFromJson)
   final Map<String, String>? path;
+
+  static List<String>? _systemFromJson(dynamic value) {
+    if (value == null) return null;
+    if (value is List) {
+      return value
+          .where((item) => item != null)
+          .map((item) => item.toString())
+          .toList();
+    }
+    if (value is String) {
+      return [value];
+    }
+    return null;
+  }
 
   static Map<String, String>? _pathFromJson(dynamic value) {
     if (value is Map<String, dynamic>) {
@@ -67,8 +96,29 @@ class ChatMessageModel {
     return null;
   }
 
-  factory ChatMessageModel.fromJson(Map<String, dynamic> json) =>
-      _$ChatMessageModelFromJson(json);
+  factory ChatMessageModel.fromJson(Map<String, dynamic> json) {
+    final model = _$ChatMessageModelFromJson(json);
+
+    // 手动处理 completedTime
+    final completedTime = _completedTimeFromJson(json['time']);
+
+    return ChatMessageModel(
+      id: model.id,
+      sessionId: model.sessionId,
+      role: model.role,
+      time: model.time,
+      completedTime: completedTime,
+      parts: model.parts,
+      providerId: model.providerId,
+      modelId: model.modelId,
+      cost: model.cost,
+      tokens: model.tokens,
+      error: model.error,
+      mode: model.mode,
+      system: model.system,
+      path: model.path,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$ChatMessageModelToJson(this);
 
@@ -92,6 +142,7 @@ class ChatMessageModel {
         sessionId: sessionId,
         time: time,
         parts: domainParts,
+        completedTime: completedTime,
         providerId: providerId,
         modelId: modelId,
         cost: cost,
@@ -114,6 +165,7 @@ class ChatMessageModel {
         sessionId: message.sessionId,
         role: 'assistant',
         time: message.time,
+        completedTime: message.completedTime,
         parts: parts,
         providerId: message.providerId,
         modelId: message.modelId,
@@ -463,9 +515,23 @@ class MessageTokensModel {
     required this.total,
   });
 
+  @JsonKey(fromJson: _intFromJson)
   final int input;
+  @JsonKey(fromJson: _intFromJson)
   final int output;
+  @JsonKey(fromJson: _intFromJson)
   final int total;
+
+  static int _intFromJson(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) {
+      final parsed = int.tryParse(value);
+      if (parsed != null) return parsed;
+    }
+    return 0;
+  }
 
   factory MessageTokensModel.fromJson(Map<String, dynamic> json) =>
       _$MessageTokensModelFromJson(json);

@@ -13,6 +13,19 @@ class ChatMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUser = message.role == MessageRole.user;
 
+    // 检查消息是否有有效内容
+    final hasValidContent = message.parts.any((part) {
+      if (part is TextPart) {
+        return part.text.trim().isNotEmpty;
+      }
+      return true; // 非文本部件默认认为有效
+    });
+
+    // 如果没有有效内容，不显示消息
+    if (!hasValidContent) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       child: Row(
@@ -213,6 +226,11 @@ class ChatMessageWidget extends StatelessWidget {
   }
 
   Widget _buildTextPart(BuildContext context, TextPart part) {
+    // 如果文本为空或只包含空白字符，不显示此部件
+    if (part.text.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return SizedBox(
       width: double.infinity,
       child: Column(

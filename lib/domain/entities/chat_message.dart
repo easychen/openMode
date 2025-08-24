@@ -37,6 +37,7 @@ class AssistantMessage extends ChatMessage {
     required super.sessionId,
     required super.time,
     super.parts,
+    this.completedTime,
     this.providerId,
     this.modelId,
     this.cost,
@@ -45,6 +46,7 @@ class AssistantMessage extends ChatMessage {
     this.mode,
   }) : super(role: MessageRole.assistant);
 
+  final DateTime? completedTime;
   final String? providerId;
   final String? modelId;
   final double? cost;
@@ -52,9 +54,13 @@ class AssistantMessage extends ChatMessage {
   final MessageError? error;
   final String? mode;
 
+  /// 检查消息是否完成
+  bool get isCompleted => completedTime != null;
+
   @override
   List<Object?> get props => [
     ...super.props,
+    completedTime,
     providerId,
     modelId,
     cost,

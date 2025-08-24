@@ -279,86 +279,205 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     ChatInputModel input,
   ) async* {
     try {
-      // 先尝试普通的 JSON 响应
+      print('=== 开始发送消息 ===');
+      print('会话ID: $sessionId');
+      print('消息ID: ${input.messageId}');
+      print('==================');
+
+      // 启动 SSE 监听器，监听消息更新事件
+      final eventController = StreamController<ChatMessageModel>();
+      late StreamSubscription eventSubscription;
+      bool messageCompleted = false;
+
+      // 创建 SSE 监听器
+      try {
+        final eventResponse = await dio.get(
+          '/event',
+          options: Options(
+            headers: {
+              'Accept': 'text/event-stream',
+              'Cache-Control': 'no-cache',
+            },
+            responseType: ResponseType.stream,
+          ),
+        );
+
+        if (eventResponse.statusCode == 200) {
+          print('✅ 成功连接到事件流');
+
+          eventSubscription = (eventResponse.data as Stream<Uint8List>)
+              .transform(
+                StreamTransformer.fromHandlers(
+                  handleData: (Uint8List data, EventSink<String> sink) {
+                    sink.add(utf8.decode(data));
+                  },
+                ),
+              )
+              .transform(const LineSplitter())
+              .where((line) => line.startsWith('data: '))
+              .map((line) => line.substring(6)) // 移除 "data: " 前缀
+              .where((data) => data.isNotEmpty && data != '[DONE]')
+              .listen(
+                (eventData) {
+                  try {
+                    final event = jsonDecode(eventData) as Map<String, dynamic>;
+                    final eventType = event['type'] as String?;
+
+                    print('📨 收到事件: $eventType');
+
+                    if (eventType == 'message.updated') {
+                      final properties =
+                          event['properties'] as Map<String, dynamic>?;
+                      final info = properties?['info'] as Map<String, dynamic>?;
+
+                      if (info != null && info['sessionID'] == sessionId) {
+                        print('🔄 消息更新事件: ${info['id']}');
+                        // 获取完整的消息信息（包括 parts）
+                        _getCompleteMessage(sessionId, info['id'])
+                            .then((message) {
+                              if (message != null) {
+                                eventController.add(message);
+
+                                // 检查消息是否完成
+                                if (message.completedTime != null &&
+                                    !messageCompleted) {
+                                  messageCompleted = true;
+                                  print('🎉 消息完成，准备关闭事件流');
+                                  // 延迟关闭，确保最后的更新被处理
+                                  Future.delayed(
+                                    const Duration(milliseconds: 500),
+                                    () {
+                                      eventSubscription.cancel();
+                                      eventController.close();
+                                    },
+                                  );
+                                }
+                              }
+                            })
+                            .catchError((error) {
+                              print('获取完整消息失败: $error');
+                            });
+                      }
+                    } else if (eventType == 'message.part.updated') {
+                      final properties =
+                          event['properties'] as Map<String, dynamic>?;
+                      final part = properties?['part'] as Map<String, dynamic>?;
+
+                      if (part != null && part['sessionID'] == sessionId) {
+                        print(
+                          '🔄 消息部件更新: ${part['messageID']} - ${part['id']}',
+                        );
+                        // 获取完整的消息信息
+                        _getCompleteMessage(sessionId, part['messageID'])
+                            .then((message) {
+                              if (message != null) {
+                                eventController.add(message);
+
+                                // 检查消息是否完成
+                                if (message.completedTime != null &&
+                                    !messageCompleted) {
+                                  messageCompleted = true;
+                                  print('🎉 消息完成，准备关闭事件流');
+                                  // 延迟关闭，确保最后的更新被处理
+                                  Future.delayed(
+                                    const Duration(milliseconds: 500),
+                                    () {
+                                      eventSubscription.cancel();
+                                      eventController.close();
+                                    },
+                                  );
+                                }
+                              }
+                            })
+                            .catchError((error) {
+                              print('获取完整消息失败: $error');
+                            });
+                      }
+                    }
+                  } catch (e) {
+                    print('解析事件失败: $e');
+                    print('事件数据: $eventData');
+                  }
+                },
+                onError: (error) {
+                  print('事件流错误: $error');
+                  eventController.addError(error);
+                },
+                onDone: () {
+                  print('事件流结束');
+                  eventController.close();
+                },
+              );
+        }
+      } catch (e) {
+        print('连接事件流失败: $e');
+      }
+
+      // 发送消息请求
       final response = await dio.post(
         '/session/$sessionId/message',
         data: input.toJson(),
       );
 
       if (response.statusCode == 200) {
-        // 处理直接返回的消息响应
         final responseData = response.data;
-        print('发送消息响应: $responseData');
+        print('=== 消息发送成功 ===');
+        print('响应数据: ${jsonEncode(responseData)}');
+        print('==================');
 
+        // 如果有直接响应，先yield一次
         if (responseData is Map<String, dynamic>) {
-          // 检查是否包含 info 和 parts
-          if (responseData.containsKey('info') &&
-              responseData.containsKey('parts')) {
-            final info = responseData['info'] as Map<String, dynamic>;
-            final parts = responseData['parts'] as List<dynamic>? ?? [];
-            print('解析消息 - info: $info, parts: $parts');
+          try {
+            // 检查响应是否包含 info 和 parts 字段
+            if (responseData.containsKey('info')) {
+              print('=== 处理包含 info 的响应 ===');
+              final info = responseData['info'] as Map<String, dynamic>;
+              final parts = responseData['parts'] as List<dynamic>? ?? [];
 
-            // 合并 info 和 parts 到一个完整的消息对象
-            final messageData = Map<String, dynamic>.from(info);
-            messageData['parts'] = parts;
+              print('Info 数据: ${jsonEncode(info)}');
+              print('Parts 数量: ${parts.length}');
 
-            try {
-              print('准备解析消息数据: ${messageData.keys}');
-              print('消息数据示例: ${messageData.toString().substring(0, 500)}...');
-              final message = ChatMessageModel.fromJson(messageData);
-              print('成功创建消息模型: ${message.id}');
-              yield message;
-            } catch (e, stackTrace) {
-              print('创建消息模型失败: $e');
-              print('堆栈跟踪: $stackTrace');
-              print('失败的数据: $messageData');
-              // 尝试提取文本内容作为备用
-              String fallbackText = 'AI 回复解析失败';
-
-              // 尝试从 parts 中提取文本
-              if (parts.isNotEmpty) {
-                final textParts = <String>[];
-                for (final part in parts) {
-                  if (part is Map<String, dynamic> && part['type'] == 'text') {
-                    final text = part['text'] as String?;
-                    if (text != null && text.isNotEmpty) {
-                      textParts.add(text);
-                    }
-                  }
-                }
-                if (textParts.isNotEmpty) {
-                  fallbackText = textParts.join('\n');
-                }
+              // 检查 time 字段结构
+              print('=== Time 字段分析 ===');
+              final timeField = info['time'];
+              print('Time 字段类型: ${timeField.runtimeType}');
+              print('Time 字段内容: $timeField');
+              if (timeField is Map<String, dynamic>) {
+                print('Time.created: ${timeField['created']}');
+                print('Time.completed: ${timeField['completed']}');
               }
+              print('==================');
 
-              // 创建一个简单的文本消息作为备用
-              yield ChatMessageModel(
-                id: info['id'] ?? 'unknown',
-                sessionId: info['sessionID'] ?? '',
-                role: info['role'] ?? 'assistant',
-                time: DateTime.now(),
-                parts: [
-                  MessagePartModel(
-                    id: 'part_${DateTime.now().millisecondsSinceEpoch}',
-                    sessionId: info['sessionID'] ?? '',
-                    messageId: info['id'] ?? 'unknown',
-                    type: 'text',
-                    text: fallbackText,
-                  ),
-                ],
-              );
+              // 合并 info 和 parts
+              final messageData = Map<String, dynamic>.from(info);
+              messageData['parts'] = parts;
+
+              final message = ChatMessageModel.fromJson(messageData);
+              print('✅ 成功解析响应消息: ${message.id}');
+              yield message;
+            } else {
+              // 直接解析整个响应
+              print('=== 直接解析响应 ===');
+              final message = ChatMessageModel.fromJson(responseData);
+              print('✅ 成功解析响应消息: ${message.id}');
+              yield message;
             }
-          } else {
-            // 如果直接是消息对象
-            print('直接解析消息: $responseData');
-            try {
-              yield ChatMessageModel.fromJson(responseData);
-            } catch (e) {
-              print('直接解析消息失败: $e');
-            }
+          } catch (e, stackTrace) {
+            print('=== 解析直接响应失败 ===');
+            print('❌ 错误: $e');
+            print('堆栈跟踪: $stackTrace');
+            print('响应数据: ${jsonEncode(responseData)}');
+            print('=======================');
           }
         }
+
+        // 然后监听流式更新
+        await for (final message in eventController.stream) {
+          yield message;
+        }
       } else {
+        eventSubscription.cancel();
+        eventController.close();
         throw const ServerException('服务器错误');
       }
     } on DioException catch (e) {
@@ -372,6 +491,55 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     } catch (e) {
       throw const ServerException('服务器错误');
     }
+  }
+
+  /// 获取完整的消息信息（包括parts）
+  Future<ChatMessageModel?> _getCompleteMessage(
+    String sessionId,
+    String messageId,
+  ) async {
+    try {
+      final response = await dio.get('/session/$sessionId/message/$messageId');
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        print('=== 获取完整消息响应 ===');
+        print('消息ID: $messageId');
+        print('响应数据: ${jsonEncode(responseData)}');
+
+        if (responseData is Map<String, dynamic>) {
+          if (responseData.containsKey('info') &&
+              responseData.containsKey('parts')) {
+            final info = responseData['info'] as Map<String, dynamic>;
+            final parts = responseData['parts'] as List<dynamic>? ?? [];
+
+            // 检查完整消息的 time 字段
+            print('=== 完整消息 Time 字段分析 ===');
+            final timeField = info['time'];
+            print('Time 字段类型: ${timeField.runtimeType}');
+            print('Time 字段内容: $timeField');
+            if (timeField is Map<String, dynamic>) {
+              print('Time.created: ${timeField['created']}');
+              print('Time.completed: ${timeField['completed']}');
+            }
+            print('==========================');
+
+            final messageData = Map<String, dynamic>.from(info);
+            messageData['parts'] = parts;
+
+            final message = ChatMessageModel.fromJson(messageData);
+            print('✅ 完整消息解析成功: ${message.id}');
+            print('完成时间: ${message.completedTime}');
+            return message;
+          } else {
+            return ChatMessageModel.fromJson(responseData);
+          }
+        }
+      }
+    } catch (e) {
+      print('获取消息详情失败: $e');
+    }
+    return null;
   }
 
   @override
