@@ -225,7 +225,7 @@ try {
 process.exit(exitCode)
 
 function createOpencode() {
-  const host = "dd.ftqq.com"
+  const host = "127.0.0.1"
   const port = 4096
   const url = `http://${host}:${port}`
   const proc = spawn(`opencode`, [`serve`, `--hostname=${host}`, `--port=${port}`])

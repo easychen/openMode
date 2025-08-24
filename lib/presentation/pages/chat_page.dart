@@ -16,6 +16,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final ScrollController _scrollController = ScrollController();
+  ChatProvider? _chatProvider;
 
   @override
   void initState() {
@@ -26,10 +27,16 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 在这里安全地获取 ChatProvider 引用
+    _chatProvider ??= context.read<ChatProvider>();
+  }
+
+  @override
   void dispose() {
-    // 清理滚动回调
-    final chatProvider = context.read<ChatProvider>();
-    chatProvider.setScrollToBottomCallback(null);
+    // 使用保存的引用清理滚动回调
+    _chatProvider?.setScrollToBottomCallback(null);
 
     _scrollController.dispose();
     super.dispose();
@@ -101,6 +108,9 @@ class _ChatPageState extends State<ChatPage> {
               return PopupMenuButton<String>(
                 onSelected: (value) async {
                   switch (value) {
+                    case 'back':
+                      Navigator.of(context).pop();
+                      break;
                     case 'new_session':
                       await _createNewSession();
                       break;
@@ -110,6 +120,17 @@ class _ChatPageState extends State<ChatPage> {
                   }
                 },
                 itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'back',
+                    child: Row(
+                      children: [
+                        Icon(Icons.arrow_back),
+                        SizedBox(width: 8),
+                        Text('返回上一级'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
                   const PopupMenuItem(
                     value: 'new_session',
                     child: Row(

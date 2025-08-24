@@ -196,10 +196,18 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
                   ),
                   const SizedBox(width: AppConstants.smallPadding),
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: ElevatedButton.icon(
                       onPressed: _testConnection,
                       icon: const Icon(Icons.wifi_find),
                       label: const Text('测试连接'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.secondary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSecondary,
+                      ),
                     ),
                   ),
                 ],
