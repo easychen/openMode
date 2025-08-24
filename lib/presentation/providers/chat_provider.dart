@@ -176,12 +176,12 @@ class ChatProvider extends ChangeNotifier {
 
     if (sessionDate == today) {
       // 今天的对话显示时间
-      return 'Tody ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      return 'Today ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     } else {
       final difference = today.difference(sessionDate).inDays;
       if (difference == 1) {
         // 昨天的对话
-        return '昨天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+        return 'Yesterday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else if (difference < 7) {
         // 一周内的对话显示星期几
         final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
