@@ -14,66 +14,152 @@ class ChatMessageWidget extends StatelessWidget {
     final isUser = message.role == MessageRole.user;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 头像
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: isUser
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.secondary,
+          // 现代化头像设计
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isUser
+                    ? [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.primaryContainer,
+                      ]
+                    : [
+                        Theme.of(context).colorScheme.tertiary,
+                        Theme.of(context).colorScheme.tertiaryContainer,
+                      ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      (isUser
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.tertiary)
+                          .withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Icon(
-              isUser ? Icons.person : Icons.smart_toy,
+              isUser ? Icons.person : Icons.psychology,
               color: Colors.white,
               size: 20,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
 
-          // 消息内容
+          // 消息内容容器 - 现代化设计
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 消息头部信息
-                Row(
-                  children: [
-                    Text(
-                      isUser ? '你' : 'AI 助手',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _formatTime(message.time),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (!isUser && message is AssistantMessage)
-                      _buildAssistantInfo(context, message as AssistantMessage),
-                  ],
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isUser
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withOpacity(0.1)
+                    : Theme.of(
+                        context,
+                      ).colorScheme.surfaceVariant.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(16).copyWith(
+                  topLeft: isUser
+                      ? const Radius.circular(16)
+                      : const Radius.circular(4),
+                  topRight: isUser
+                      ? const Radius.circular(4)
+                      : const Radius.circular(16),
                 ),
-                const SizedBox(height: 8),
-
-                // 消息部件列表
-                ...message.parts.map(
-                  (part) => _buildMessagePart(context, part),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
                 ),
-
-                // 错误信息
-                if (message is AssistantMessage &&
-                    (message as AssistantMessage).error != null)
-                  _buildErrorInfo(
-                    context,
-                    (message as AssistantMessage).error!,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 消息头部信息 - 现代化设计
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isUser
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.1)
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.tertiary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          isUser ? '你' : 'AI 助手',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: isUser
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.tertiary,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          _formatTime(message.time),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontSize: 10,
+                              ),
+                        ),
+                      ),
+                      const Spacer(),
+                      if (!isUser && message is AssistantMessage)
+                        _buildAssistantInfo(
+                          context,
+                          message as AssistantMessage,
+                        ),
+                    ],
                   ),
-              ],
+                  const SizedBox(height: 12),
+
+                  // 消息部件列表
+                  ...message.parts.map(
+                    (part) => _buildMessagePart(context, part),
+                  ),
+
+                  // 错误信息
+                  if (message is AssistantMessage &&
+                      (message as AssistantMessage).error != null)
+                    _buildErrorInfo(
+                      context,
+                      (message as AssistantMessage).error!,
+                    ),
+                ],
+              ),
             ),
           ),
         ],

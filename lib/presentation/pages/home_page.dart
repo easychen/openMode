@@ -28,18 +28,102 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text('OpenCode Mobile'),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.tertiary,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.developer_mode,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('OpenCode Mobile'),
+          ],
+        ),
         actions: [
-          // 连接状态指示器
+          // 连接状态指示器 - 现代化设计
           Consumer<AppProvider>(
             builder: (context, appProvider, child) {
-              return IconButton(
-                icon: Icon(
-                  appProvider.isConnected ? Icons.cloud_done : Icons.cloud_off,
-                  color: appProvider.isConnected ? Colors.green : Colors.red,
+              return Container(
+                margin: const EdgeInsets.only(right: 8),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ServerSettingsPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: appProvider.isConnected
+                            ? Theme.of(
+                                context,
+                              ).colorScheme.tertiary.withOpacity(0.2)
+                            : Theme.of(
+                                context,
+                              ).colorScheme.error.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: appProvider.isConnected
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.tertiary.withOpacity(0.3)
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.error.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Icon(
+                        appProvider.isConnected
+                            ? Icons.cloud_done
+                            : Icons.cloud_off,
+                        color: appProvider.isConnected
+                            ? Theme.of(context).colorScheme.tertiary
+                            : Theme.of(context).colorScheme.error,
+                        size: 20,
+                      ),
+                    ),
+                  ),
                 ),
-                onPressed: () {
+              );
+            },
+          ),
+          // 设置按钮 - 现代化设计
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -47,20 +131,27 @@ class _HomePageState extends State<HomePage> {
                     ),
                   );
                 },
-              );
-            },
-          ),
-          // 设置按钮
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ServerSettingsPage(),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceVariant.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withOpacity(0.2),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.settings,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ],
       ),
@@ -76,88 +167,275 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 构建需要连接的界面
+  /// 构建需要连接的界面 - 现代化设计
   Widget _buildConnectionRequired() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.cloud_off, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: AppConstants.defaultPadding),
-            Text(
-              '需要连接到 OpenCode 服务器',
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppConstants.smallPadding),
-            Text(
-              '请配置服务器地址和端口',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppConstants.largePadding),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ServerSettingsPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.settings),
-              label: const Text('配置服务器'),
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.topCenter,
+          radius: 1.5,
+          colors: [
+            Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            Theme.of(context).colorScheme.background,
           ],
+        ),
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.defaultPadding * 2),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 连接状态图标 - 现代化设计
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.error.withOpacity(0.1),
+                      Theme.of(context).colorScheme.error.withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(40),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.error.withOpacity(0.2),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.cloud_off_rounded,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+
+              const SizedBox(height: AppConstants.largePadding),
+
+              // 主标题
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(
+                        context,
+                      ).colorScheme.onBackground.withOpacity(0.1),
+                      Theme.of(
+                        context,
+                      ).colorScheme.onBackground.withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '需要连接到 OpenCode 服务器',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: AppConstants.defaultPadding),
+
+              // 副标题
+              Text(
+                '请配置服务器地址和端口以开始使用 AI 助手',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: AppConstants.largePadding * 1.5),
+
+              // 配置按钮 - 现代化设计
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.tertiary,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ServerSettingsPage(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.largePadding,
+                      vertical: AppConstants.defaultPadding,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  icon: const Icon(Icons.settings_rounded, color: Colors.white),
+                  label: const Text(
+                    '配置服务器',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// 构建已连接的内容
+  /// 构建已连接的内容 - 现代化设计
   Widget _buildConnectedContent() {
-    return Padding(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 欢迎卡片
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.topCenter,
+          radius: 1.5,
+          colors: [
+            Theme.of(context).colorScheme.tertiary.withOpacity(0.05),
+            Theme.of(context).colorScheme.background,
+          ],
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 欢迎卡片 - 现代化设计
+            Container(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding * 1.5),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.tertiary.withOpacity(0.1),
+                    Theme.of(context).colorScheme.tertiary.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.tertiary.withOpacity(0.2),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.tertiary.withOpacity(0.1),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.check_circle, color: Colors.green),
-                      const SizedBox(width: AppConstants.smallPadding),
-                      Text(
-                        '已连接到 OpenCode',
-                        style: Theme.of(context).textTheme.titleMedium,
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.tertiary,
+                              Theme.of(
+                                context,
+                              ).colorScheme.tertiary.withOpacity(0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.tertiary.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: AppConstants.defaultPadding),
+                      Expanded(
+                        child: Text(
+                          '已连接到 OpenCode',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
+                        ),
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: AppConstants.defaultPadding),
+
                   Consumer<AppProvider>(
                     builder: (context, appProvider, child) {
                       if (appProvider.appInfo != null) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: AppConstants.smallPadding),
-                            Text(
-                              '服务器: ${appProvider.serverUrl}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              '主机: ${appProvider.appInfo!.hostname}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceVariant.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInfoRow(
+                                context,
+                                Icons.dns_rounded,
+                                '服务器',
+                                appProvider.serverUrl,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildInfoRow(
+                                context,
+                                Icons.computer_rounded,
+                                '主机',
+                                appProvider.appInfo!.hostname,
+                              ),
+                            ],
+                          ),
                         );
                       }
                       return const SizedBox.shrink();
@@ -166,107 +444,234 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-          ),
 
-          const SizedBox(height: AppConstants.defaultPadding),
+            const SizedBox(height: AppConstants.largePadding),
 
-          // 功能菜单
-          Text('功能', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: AppConstants.smallPadding),
-
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: AppConstants.smallPadding,
-              mainAxisSpacing: AppConstants.smallPadding,
-              children: [
-                _buildFeatureCard(
-                  context,
-                  icon: Icons.chat,
-                  title: 'AI 对话',
-                  subtitle: '与 AI 助手聊天',
-                  onTap: () {
-                    _navigateToChat(context);
-                  },
-                ),
-                _buildFeatureCard(
-                  context,
-                  icon: Icons.folder,
-                  title: '文件管理',
-                  subtitle: '浏览和编辑文件',
-                  onTap: () {
-                    // TODO: 导航到文件管理页面
-                    _showComingSoon(context);
-                  },
-                ),
-                _buildFeatureCard(
-                  context,
-                  icon: Icons.history,
-                  title: '会话历史',
-                  subtitle: '查看历史对话',
-                  onTap: () {
-                    // TODO: 导航到会话历史页面
-                    _showComingSoon(context);
-                  },
-                ),
-                _buildFeatureCard(
-                  context,
-                  icon: Icons.psychology,
-                  title: 'AI 代理',
-                  subtitle: '选择 AI 代理',
-                  onTap: () {
-                    // TODO: 导航到代理选择页面
-                    _showComingSoon(context);
-                  },
-                ),
-              ],
+            // 功能菜单标题 - 现代化设计
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.tertiary,
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '功能',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            const SizedBox(height: AppConstants.defaultPadding),
+
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: AppConstants.defaultPadding,
+                mainAxisSpacing: AppConstants.defaultPadding,
+                childAspectRatio: 1.1,
+                children: [
+                  _buildFeatureCard(
+                    context,
+                    icon: Icons.psychology_rounded,
+                    title: 'AI 对话',
+                    subtitle: '与 AI 助手聊天',
+                    gradientColors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.tertiary,
+                    ],
+                    onTap: () {
+                      _navigateToChat(context);
+                    },
+                  ),
+                  _buildFeatureCard(
+                    context,
+                    icon: Icons.folder_rounded,
+                    title: '文件管理',
+                    subtitle: '浏览和编辑文件',
+                    gradientColors: [
+                      Theme.of(context).colorScheme.secondary,
+                      Theme.of(context).colorScheme.secondary.withOpacity(0.7),
+                    ],
+                    onTap: () {
+                      _showComingSoon(context);
+                    },
+                  ),
+                  _buildFeatureCard(
+                    context,
+                    icon: Icons.history_rounded,
+                    title: '会话历史',
+                    subtitle: '查看历史对话',
+                    gradientColors: [
+                      Theme.of(context).colorScheme.tertiary,
+                      Theme.of(context).colorScheme.tertiary.withOpacity(0.7),
+                    ],
+                    onTap: () {
+                      _showComingSoon(context);
+                    },
+                  ),
+                  _buildFeatureCard(
+                    context,
+                    icon: Icons.smart_toy_rounded,
+                    title: 'AI 代理',
+                    subtitle: '选择 AI 代理',
+                    gradientColors: [
+                      Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                      Theme.of(context).colorScheme.secondary.withOpacity(0.8),
+                    ],
+                    onTap: () {
+                      _showComingSoon(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  /// 构建功能卡片
+  /// 构建功能卡片 - 现代化设计
   Widget _buildFeatureCard(
     BuildContext context, {
     required IconData icon,
     required String title,
     required String subtitle,
+    required List<Color> gradientColors,
     required VoidCallback onTap,
   }) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.defaultPadding),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 48,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: AppConstants.smallPadding),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                textAlign: TextAlign.center,
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(AppConstants.defaultPadding * 1.2),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 图标容器 - 现代化设计
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: gradientColors,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: gradientColors.first.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(icon, size: 32, color: Colors.white),
+                ),
+
+                const SizedBox(height: AppConstants.defaultPadding),
+
+                // 标题
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 6),
+
+                // 副标题
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  /// 构建信息行
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Theme.of(context).colorScheme.tertiary),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 

@@ -14,6 +14,7 @@ import '../../domain/usecases/get_chat_sessions.dart';
 import '../../domain/usecases/create_chat_session.dart';
 import '../../domain/usecases/get_chat_messages.dart';
 import '../../domain/usecases/get_providers.dart';
+import '../../domain/usecases/delete_chat_session.dart';
 import '../../data/datasources/chat_remote_datasource.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -66,6 +67,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CreateChatSession(sl()));
   sl.registerLazySingleton(() => GetChatMessages(sl()));
   sl.registerLazySingleton(() => GetProviders(sl()));
+  sl.registerLazySingleton(() => DeleteChatSession(sl()));
 
   // 状态管理
   sl.registerFactory(
@@ -83,6 +85,7 @@ Future<void> init() async {
       createChatSession: sl(),
       getChatMessages: sl(),
       getProviders: sl(),
+      deleteChatSession: sl(),
     ),
   );
 

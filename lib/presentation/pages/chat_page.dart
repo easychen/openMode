@@ -27,6 +27,10 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
+    // 清理滚动回调
+    final chatProvider = context.read<ChatProvider>();
+    chatProvider.setScrollToBottomCallback(null);
+
     _scrollController.dispose();
     super.dispose();
   }
@@ -34,26 +38,63 @@ class _ChatPageState extends State<ChatPage> {
   void _loadInitialData() {
     final chatProvider = context.read<ChatProvider>();
 
+    // 设置滚动到底部的回调
+    chatProvider.setScrollToBottomCallback(_scrollToBottom);
+
     // 使用默认工作空间 ID（实际项目中应该从用户配置或服务器获取）
     const workspaceId = 'default';
     chatProvider.loadSessions(workspaceId);
   }
 
   void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+    if (!_scrollController.hasClients) return;
+
+    // 智能滚动：只在用户接近底部时才自动滚动
+    final position = _scrollController.position;
+    final threshold = 200.0; // 距离底部200像素内认为是接近底部
+
+    if (position.maxScrollExtent - position.pixels <= threshold) {
+      // 延迟一帧确保消息已经渲染完成
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text('AI 对话'),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.psychology,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('AI 对话'),
+          ],
+        ),
         actions: [
           Consumer<ChatProvider>(
             builder: (context, chatProvider, child) {
@@ -100,24 +141,69 @@ class _ChatPageState extends State<ChatPage> {
         builder: (context, chatProvider, child) {
           return Column(
             children: [
-              // 当前会话信息
+              // 当前会话信息 - 现代化设计
               if (chatProvider.currentSession != null)
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Theme.of(context).dividerColor,
-                        width: 0.5,
-                      ),
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(
+                          context,
+                        ).colorScheme.surfaceVariant.withOpacity(0.3),
+                        Theme.of(
+                          context,
+                        ).colorScheme.surfaceVariant.withOpacity(0.1),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withOpacity(0.2),
                     ),
                   ),
-                  child: Text(
-                    chatProvider.currentSession!.title ?? '新对话',
-                    style: Theme.of(context).textTheme.titleSmall,
-                    textAlign: TextAlign.center,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.primary,
+                              Theme.of(context).colorScheme.tertiary,
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          chatProvider.currentSession!.title ?? '新对话',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 16,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.7),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -167,7 +253,7 @@ class _ChatPageState extends State<ChatPage> {
                     Navigator.of(context).pop(); // 关闭抽屉
                   },
                   onSessionDeleted: (session) {
-                    // TODO: 实现删除会话功能
+                    chatProvider.deleteSession(session.id);
                   },
                 ),
               ),

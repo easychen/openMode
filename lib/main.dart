@@ -24,9 +24,9 @@ class MyApp extends StatelessWidget {
       providers: [ChangeNotifierProvider(create: (_) => di.sl<AppProvider>())],
       child: MaterialApp(
         title: AppConstants.appName,
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.darkTheme,
         darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
+        themeMode: ThemeMode.dark, // 默认使用深色主题
         home: const HomePage(),
         debugShowCheckedModeBanner: false,
       ),

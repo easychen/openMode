@@ -73,7 +73,7 @@ class ChatSessionList extends StatelessWidget {
               ),
             ),
             title: Text(
-              session.title ?? '新对话',
+              session.title ?? _generateFallbackTitle(session.time),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected
@@ -207,6 +207,32 @@ class ChatSessionList extends StatelessWidget {
     }
   }
 
+  /// 生成备用会话标题
+  String _generateFallbackTitle(DateTime time) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final sessionDate = DateTime(time.year, time.month, time.day);
+
+    if (sessionDate == today) {
+      // 今天的对话显示时间
+      return '今天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    } else {
+      final difference = today.difference(sessionDate).inDays;
+      if (difference == 1) {
+        // 昨天的对话
+        return '昨天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      } else if (difference < 7) {
+        // 一周内的对话显示星期几
+        final weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        final weekday = weekdays[time.weekday - 1];
+        return '$weekday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      } else {
+        // 更早的对话显示日期
+        return '${time.month}月${time.day}日 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      }
+    }
+  }
+
   void _showRenameDialog(BuildContext context, ChatSession session) {
     final controller = TextEditingController(text: session.title);
 
@@ -251,7 +277,9 @@ class ChatSessionList extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('删除对话'),
-        content: Text('确定要删除对话 "${session.title ?? '新对话'}" 吗？此操作无法撤销。'),
+        content: Text(
+          '确定要删除对话 "${session.title ?? _generateFallbackTitle(session.time)}" 吗？此操作无法撤销。',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

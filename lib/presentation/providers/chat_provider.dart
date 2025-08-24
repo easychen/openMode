@@ -8,6 +8,7 @@ import '../../domain/usecases/get_chat_sessions.dart';
 import '../../domain/usecases/create_chat_session.dart';
 import '../../domain/usecases/get_chat_messages.dart';
 import '../../domain/usecases/get_providers.dart';
+import '../../domain/usecases/delete_chat_session.dart';
 import '../../core/errors/failures.dart';
 
 /// 聊天状态
@@ -21,13 +22,18 @@ class ChatProvider extends ChangeNotifier {
     required this.createChatSession,
     required this.getChatMessages,
     required this.getProviders,
+    required this.deleteChatSession,
   });
+
+  // 滚动回调
+  VoidCallback? _scrollToBottomCallback;
 
   final SendChatMessage sendChatMessage;
   final GetChatSessions getChatSessions;
   final CreateChatSession createChatSession;
   final GetChatMessages getChatMessages;
   final GetProviders getProviders;
+  final DeleteChatSession deleteChatSession;
 
   ChatState _state = ChatState.initial;
   List<ChatSession> _sessions = [];
@@ -52,6 +58,11 @@ class ChatProvider extends ChangeNotifier {
   Map<String, String> get defaultModels => _defaultModels;
   String? get selectedProviderId => _selectedProviderId;
   String? get selectedModelId => _selectedModelId;
+
+  /// 设置滚动到底部的回调
+  void setScrollToBottomCallback(VoidCallback? callback) {
+    _scrollToBottomCallback = callback;
+  }
 
   /// 设置状态
   void _setState(ChatState newState) {
@@ -136,11 +147,15 @@ class ChatProvider extends ChangeNotifier {
   Future<void> createNewSession(String workspaceId, {String? title}) async {
     _setState(ChatState.loading);
 
+    // 生成基于时间的标题
+    final now = DateTime.now();
+    final defaultTitle = title ?? _generateSessionTitle(now);
+
     final result = await createChatSession(
       CreateChatSessionParams(
         input: SessionCreateInput(
           workspaceId: workspaceId,
-          title: title ?? '新对话',
+          title: defaultTitle,
         ),
       ),
     );
@@ -148,16 +163,47 @@ class ChatProvider extends ChangeNotifier {
     result.fold((failure) => _handleFailure(failure), (session) {
       _sessions.insert(0, session);
       _currentSession = session;
-      _messages.clear();
+      _messages.clear(); // 确保新会话开始时消息列表为空
       _setState(ChatState.loaded);
     });
+  }
+
+  /// 生成基于时间的会话标题
+  String _generateSessionTitle(DateTime time) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final sessionDate = DateTime(time.year, time.month, time.day);
+
+    if (sessionDate == today) {
+      // 今天的对话显示时间
+      return '今天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    } else {
+      final difference = today.difference(sessionDate).inDays;
+      if (difference == 1) {
+        // 昨天的对话
+        return '昨天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      } else if (difference < 7) {
+        // 一周内的对话显示星期几
+        final weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        final weekday = weekdays[time.weekday - 1];
+        return '$weekday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      } else {
+        // 更早的对话显示日期
+        return '${time.month}月${time.day}日 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      }
+    }
   }
 
   /// 选择会话
   Future<void> selectSession(ChatSession session) async {
     if (_currentSession?.id == session.id) return;
 
+    // 清空当前消息列表
+    _messages.clear();
     _currentSession = session;
+    notifyListeners();
+
+    // 加载新会话的消息
     await loadMessages(session.id);
   }
 
@@ -251,6 +297,9 @@ class ChatProvider extends ChangeNotifier {
       _messages.add(message);
     }
     notifyListeners();
+
+    // 触发自动滚动
+    _scrollToBottomCallback?.call();
   }
 
   /// 处理失败
@@ -280,6 +329,31 @@ class ChatProvider extends ChangeNotifier {
     if (_state == ChatState.error) {
       _setState(ChatState.loaded);
     }
+  }
+
+  /// 删除会话
+  Future<void> deleteSession(String sessionId) async {
+    final result = await deleteChatSession(
+      DeleteChatSessionParams(sessionId: sessionId),
+    );
+
+    result.fold((failure) => _handleFailure(failure), (_) {
+      // 从本地列表中移除会话
+      _sessions.removeWhere((session) => session.id == sessionId);
+
+      // 如果删除的是当前会话，清空当前会话和消息
+      if (_currentSession?.id == sessionId) {
+        _currentSession = null;
+        _messages.clear();
+
+        // 如果还有其他会话，选择第一个
+        if (_sessions.isNotEmpty) {
+          selectSession(_sessions.first);
+        }
+      }
+
+      notifyListeners();
+    });
   }
 
   /// 刷新当前会话
