@@ -1,0 +1,9 @@
+.DS_Store
+node_modules
+.sst
+.env
+.idea
+.vscode
+openapi.json
+playground
+tmp
