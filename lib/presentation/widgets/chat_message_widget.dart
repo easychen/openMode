@@ -376,6 +376,7 @@ class ChatMessageWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
+      constraints: const BoxConstraints(maxHeight: 900),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
         borderRadius: BorderRadius.circular(8),
@@ -404,11 +405,15 @@ class ChatMessageWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            part.text,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Text(
+                part.text,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+              ),
+            ),
           ),
         ],
       ),
@@ -484,15 +489,18 @@ class ChatMessageWidget extends StatelessWidget {
               Container(
                 margin: const EdgeInsets.only(top: 8),
                 padding: const EdgeInsets.all(8),
+                constraints: const BoxConstraints(maxHeight: 900),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Text(
-                  completedState.output,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                child: SingleChildScrollView(
+                  child: Text(
+                    completedState.output,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                  ),
                 ),
               ),
           ],
@@ -501,14 +509,17 @@ class ChatMessageWidget extends StatelessWidget {
         final errorState = state as ToolStateError;
         return Container(
           padding: const EdgeInsets.all(8),
+          constraints: const BoxConstraints(maxHeight: 900),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Text(
-            errorState.error,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onErrorContainer,
+          child: SingleChildScrollView(
+            child: Text(
+              errorState.error,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onErrorContainer,
+              ),
             ),
           ),
         );

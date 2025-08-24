@@ -53,8 +53,22 @@ class _ChatPageState extends State<ChatPage> {
     chatProvider.loadSessions(workspaceId);
   }
 
-  void _scrollToBottom() {
+  void _scrollToBottom({bool force = false}) {
     if (!_scrollController.hasClients) return;
+
+    // 如果是强制滚动（用户发送消息后），直接滚动到底部
+    if (force) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+      return;
+    }
 
     // Smart scroll: only auto-scroll when user is near bottom
     final position = _scrollController.position;
@@ -236,7 +250,8 @@ class _ChatPageState extends State<ChatPage> {
               ChatInputWidget(
                 onSendMessage: (text) async {
                   await chatProvider.sendMessage(text);
-                  _scrollToBottom();
+                  // 用户发送消息后强制滚动到底部
+                  _scrollToBottom(force: true);
                 },
                 enabled:
                     chatProvider.currentSession != null &&
