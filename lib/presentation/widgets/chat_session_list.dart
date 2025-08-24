@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/chat_session.dart';
 
-/// 聊天会话列表组件
+/// Chat session list widget
 class ChatSessionList extends StatelessWidget {
   const ChatSessionList({
     super.key,
@@ -30,14 +30,14 @@ class ChatSessionList extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              '暂无对话',
+              'No conversations',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              '创建一个新对话开始聊天',
+              'Create a new conversation to start chatting',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -155,7 +155,7 @@ class ChatSessionList extends StatelessWidget {
                     children: [
                       Icon(Icons.edit),
                       SizedBox(width: 8),
-                      Text('重命名'),
+                      Text('Rename'),
                     ],
                   ),
                 ),
@@ -165,7 +165,7 @@ class ChatSessionList extends StatelessWidget {
                     children: [
                       Icon(session.shared ? Icons.link_off : Icons.link),
                       const SizedBox(width: 8),
-                      Text(session.shared ? '取消分享' : '分享'),
+                      Text(session.shared ? 'Unshare' : 'Share'),
                     ],
                   ),
                 ),
@@ -175,7 +175,7 @@ class ChatSessionList extends StatelessWidget {
                     children: [
                       Icon(Icons.delete, color: Colors.red),
                       SizedBox(width: 8),
-                      Text('删除', style: TextStyle(color: Colors.red)),
+                      Text('Delete', style: TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),
@@ -193,42 +193,42 @@ class ChatSessionList extends StatelessWidget {
     final difference = now.difference(time);
 
     if (difference.inMinutes < 1) {
-      return '刚刚';
+      return 'Just now';
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}分钟前';
+      return '${difference.inMinutes}m ago';
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}小时前';
+      return '${difference.inHours}h ago';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}天前';
+      return '${difference.inDays}d ago';
     } else if (difference.inDays < 30) {
-      return '${(difference.inDays / 7).floor()}周前';
+      return '${(difference.inDays / 7).floor()}w ago';
     } else {
       return '${time.month}/${time.day}';
     }
   }
 
-  /// 生成备用会话标题
+  /// Generate fallback session title
   String _generateFallbackTitle(DateTime time) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final sessionDate = DateTime(time.year, time.month, time.day);
 
     if (sessionDate == today) {
-      // 今天的对话显示时间
-      return '今天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      // Show time for today's conversations
+      return 'Today ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     } else {
       final difference = today.difference(sessionDate).inDays;
       if (difference == 1) {
-        // 昨天的对话
-        return '昨天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+        // Yesterday's conversations
+        return 'Yesterday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else if (difference < 7) {
-        // 一周内的对话显示星期几
-        final weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        // Show weekday for conversations within a week
+        final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         final weekday = weekdays[time.weekday - 1];
         return '$weekday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else {
-        // 更早的对话显示日期
-        return '${time.month}月${time.day}日 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+        // Show date for older conversations
+        return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       }
     }
   }
@@ -239,29 +239,29 @@ class ChatSessionList extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('重命名对话'),
+        title: const Text('Rename Conversation'),
         content: TextField(
           controller: controller,
           autofocus: true,
           decoration: const InputDecoration(
-            hintText: '输入新的对话名称',
+            hintText: 'Enter new conversation name',
             border: OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               final newTitle = controller.text.trim();
               if (newTitle.isNotEmpty) {
-                // TODO: 实现重命名功能
+                // TODO: Implement rename functionality
                 Navigator.of(context).pop();
               }
             },
-            child: const Text('确定'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -269,21 +269,21 @@ class ChatSessionList extends StatelessWidget {
   }
 
   void _shareSession(ChatSession session) {
-    // TODO: 实现分享/取消分享功能
+    // TODO: Implement share/unshare functionality
   }
 
   void _showDeleteDialog(BuildContext context, ChatSession session) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除对话'),
+        title: const Text('Delete Conversation'),
         content: Text(
-          '确定要删除对话 "${session.title ?? _generateFallbackTitle(session.time)}" 吗？此操作无法撤销。',
+          'Are you sure you want to delete the conversation "${session.title ?? _generateFallbackTitle(session.time)}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
@@ -293,7 +293,7 @@ class ChatSessionList extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('删除'),
+            child: const Text('Delete'),
           ),
         ],
       ),

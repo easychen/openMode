@@ -3,7 +3,7 @@ import '../../domain/entities/chat_message.dart';
 
 part 'chat_message_model.g.dart';
 
-/// 聊天消息模型
+/// Chat message model
 @JsonSerializable()
 class ChatMessageModel {
   const ChatMessageModel({
@@ -34,25 +34,25 @@ class ChatMessageModel {
 
   static DateTime _timeFromJson(dynamic value) {
     if (value is Map<String, dynamic>) {
-      // 处理 {"created": number, "completed": number} 格式
+      // Handle {"created": number, "completed": number} format
       final created = value['created'] as int?;
       if (created != null) {
         return DateTime.fromMillisecondsSinceEpoch(created);
       }
     } else if (value is int) {
-      // 处理直接的时间戳
+      // Handle direct timestamp
       return DateTime.fromMillisecondsSinceEpoch(value);
     } else if (value is String) {
-      // 处理 ISO 字符串格式
+      // Handle ISO string format
       return DateTime.parse(value);
     }
-    // 默认返回当前时间
+    // Default to current time
     return DateTime.now();
   }
 
   static DateTime? _completedTimeFromJson(dynamic value) {
     if (value is Map<String, dynamic>) {
-      // 处理 {"created": number, "completed": number} 格式
+      // Handle {"created": number, "completed": number} format
       final completed = value['completed'] as int?;
       if (completed != null && completed > 0) {
         return DateTime.fromMillisecondsSinceEpoch(completed);
@@ -99,7 +99,7 @@ class ChatMessageModel {
   factory ChatMessageModel.fromJson(Map<String, dynamic> json) {
     final model = _$ChatMessageModelFromJson(json);
 
-    // 手动处理 completedTime
+    // Manually handle completedTime
     final completedTime = _completedTimeFromJson(json['time']);
 
     return ChatMessageModel(
@@ -122,7 +122,7 @@ class ChatMessageModel {
 
   Map<String, dynamic> toJson() => _$ChatMessageModelToJson(this);
 
-  /// 转换为领域实体
+  /// Convert to domain entity
   ChatMessage toDomain() {
     final messageRole = role == 'user'
         ? MessageRole.user
@@ -153,7 +153,7 @@ class ChatMessageModel {
     }
   }
 
-  /// 从领域实体创建
+  /// Create from domain entity
   static ChatMessageModel fromDomain(ChatMessage message) {
     final parts = message.parts
         .map((p) => MessagePartModel.fromDomain(p))
@@ -190,7 +190,7 @@ class ChatMessageModel {
   }
 }
 
-/// 消息部件模型
+/// Message part model
 @JsonSerializable()
 class MessagePartModel {
   const MessagePartModel({
@@ -230,7 +230,7 @@ class MessagePartModel {
   static DateTime? _partTimeFromJson(dynamic value) {
     if (value == null) return null;
     if (value is Map<String, dynamic>) {
-      // 处理 {"start": number, "end": number} 格式
+      // Handle {"start": number, "end": number} format
       final start = value['start'] as int?;
       if (start != null) {
         return DateTime.fromMillisecondsSinceEpoch(start);
@@ -248,7 +248,7 @@ class MessagePartModel {
 
   Map<String, dynamic> toJson() => _$MessagePartModelToJson(this);
 
-  /// 转换为领域实体
+  /// Convert to domain entity
   MessagePart toDomain() {
     final partType = _parsePartType(type);
 
@@ -289,7 +289,7 @@ class MessagePartModel {
           time: time,
         );
       default:
-        // 默认返回文本部件
+        // Default to text part
         return TextPart(
           id: id,
           messageId: messageId,
@@ -300,7 +300,7 @@ class MessagePartModel {
     }
   }
 
-  /// 从领域实体创建
+  /// Create from domain entity
   static MessagePartModel fromDomain(MessagePart part) {
     switch (part.type) {
       case PartType.text:
@@ -506,7 +506,7 @@ class MessagePartModel {
   }
 }
 
-/// 消息令牌模型
+/// Message token model
 @JsonSerializable()
 class MessageTokensModel {
   const MessageTokensModel({
@@ -551,7 +551,7 @@ class MessageTokensModel {
   }
 }
 
-/// 消息错误模型
+/// Message error model
 @JsonSerializable()
 class MessageErrorModel {
   const MessageErrorModel({required this.name, required this.message});

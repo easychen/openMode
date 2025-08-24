@@ -9,7 +9,7 @@ import 'core/constants/app_constants.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 初始化依赖注入
+  // Initialize dependency injection
   await di.init();
 
   runApp(const MyApp());
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         title: AppConstants.appName,
         theme: AppTheme.darkTheme,
         darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.dark, // 默认使用深色主题
+        themeMode: ThemeMode.dark, // Default to dark theme
         home: const HomePage(),
         debugShowCheckedModeBanner: false,
       ),

@@ -1,4 +1,4 @@
-/// 应用异常定义
+/// Application exception definitions
 abstract class AppException implements Exception {
   final String message;
   final int? code;
@@ -10,42 +10,42 @@ abstract class AppException implements Exception {
       'AppException: $message${code != null ? ' (code: $code)' : ''}';
 }
 
-/// 网络异常
+/// Network exception
 class NetworkException extends AppException {
   const NetworkException(super.message, [super.code]);
 }
 
-/// 服务器异常
+/// Server exception
 class ServerException extends AppException {
   const ServerException(super.message, [super.code]);
 }
 
-/// 认证异常
+/// Authentication exception
 class AuthException extends AppException {
   const AuthException(super.message, [super.code]);
 }
 
-/// 缓存异常
+/// Cache exception
 class CacheException extends AppException {
   const CacheException(super.message);
 }
 
-/// 解析异常
+/// Parse exception
 class ParseException extends AppException {
   const ParseException(super.message);
 }
 
-/// 验证异常
+/// Validation exception
 class ValidationException extends AppException {
   const ValidationException(super.message);
 }
 
-/// 文件异常
+/// File exception
 class FileException extends AppException {
   const FileException(super.message);
 }
 
-/// 未找到异常
+/// Not found exception
 class NotFoundException extends AppException {
   const NotFoundException(super.message);
 }

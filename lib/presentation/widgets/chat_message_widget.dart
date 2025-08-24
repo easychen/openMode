@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../domain/entities/chat_message.dart';
 
-/// 聊天消息组件
+/// Chat message widget
 class ChatMessageWidget extends StatelessWidget {
   const ChatMessageWidget({super.key, required this.message});
 
@@ -13,15 +13,15 @@ class ChatMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUser = message.role == MessageRole.user;
 
-    // 检查消息是否有有效内容
+    // Check if message has valid content
     final hasValidContent = message.parts.any((part) {
       if (part is TextPart) {
         return part.text.trim().isNotEmpty;
       }
-      return true; // 非文本部件默认认为有效
+      return true; // Non-text parts are considered valid by default
     });
 
-    // 如果没有有效内容，不显示消息
+    // Don't display message if no valid content
     if (!hasValidContent) {
       return const SizedBox.shrink();
     }
@@ -31,7 +31,7 @@ class ChatMessageWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 现代化头像设计
+          // Modern avatar design
           Container(
             width: 40,
             height: 40,
@@ -70,7 +70,7 @@ class ChatMessageWidget extends StatelessWidget {
           ),
           const SizedBox(width: 16),
 
-          // 消息内容容器 - 现代化设计
+          // Message content container - modern design
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -97,7 +97,7 @@ class ChatMessageWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 消息头部信息 - 现代化设计
+                  // Message header info - modern design
                   Row(
                     children: [
                       Container(
@@ -116,7 +116,7 @@ class ChatMessageWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          isUser ? '你' : 'AI 助手',
+                          isUser ? 'You' : 'AI Assistant',
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(
                                 fontWeight: FontWeight.w600,
@@ -159,12 +159,12 @@ class ChatMessageWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // 消息部件列表
+                  // Message parts list
                   ...message.parts.map(
                     (part) => _buildMessagePart(context, part),
                   ),
 
-                  // 错误信息
+                  // Error message
                   if (message is AssistantMessage &&
                       (message as AssistantMessage).error != null)
                     _buildErrorInfo(
@@ -187,24 +187,27 @@ class ChatMessageWidget extends StatelessWidget {
         size: 16,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
-      tooltip: '消息信息',
+      tooltip: 'Message Info',
       itemBuilder: (context) => [
         if (message.modelId != null)
-          PopupMenuItem(enabled: false, child: Text('模型: ${message.modelId}')),
+          PopupMenuItem(
+            enabled: false,
+            child: Text('Model: ${message.modelId}'),
+          ),
         if (message.providerId != null)
           PopupMenuItem(
             enabled: false,
-            child: Text('提供商: ${message.providerId}'),
+            child: Text('Provider: ${message.providerId}'),
           ),
         if (message.tokens != null)
           PopupMenuItem(
             enabled: false,
-            child: Text('令牌: ${message.tokens!.total}'),
+            child: Text('Tokens: ${message.tokens!.total}'),
           ),
         if (message.cost != null)
           PopupMenuItem(
             enabled: false,
-            child: Text('成本: \$${message.cost!.toStringAsFixed(6)}'),
+            child: Text('Cost: \$${message.cost!.toStringAsFixed(6)}'),
           ),
       ],
     );
@@ -226,7 +229,7 @@ class ChatMessageWidget extends StatelessWidget {
   }
 
   Widget _buildTextPart(BuildContext context, TextPart part) {
-    // 如果文本为空或只包含空白字符，不显示此部件
+    // Don't display if text is empty or only whitespace
     if (part.text.trim().isEmpty) {
       return const SizedBox.shrink();
     }
@@ -236,7 +239,7 @@ class ChatMessageWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 使用 Markdown 渲染文本
+          // Render text using Markdown
           MarkdownBody(
             data: part.text,
             styleSheet: MarkdownStyleSheet(
@@ -252,24 +255,24 @@ class ChatMessageWidget extends StatelessWidget {
             ),
             onTapLink: (text, href, title) {
               if (href != null) {
-                // TODO: 实现链接跳转
+                // TODO: Implement link navigation
               }
             },
           ),
           const SizedBox(height: 8),
 
-          // 复制按钮
+          // Copy button
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: part.text));
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Copied to clipboard')),
+                );
               },
               icon: const Icon(Icons.copy, size: 16),
-              label: const Text('复制'),
+              label: const Text('Copy'),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 minimumSize: const Size(0, 32),
@@ -303,7 +306,7 @@ class ChatMessageWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  part.filename ?? '文件',
+                  part.filename ?? 'File',
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
@@ -320,10 +323,10 @@ class ChatMessageWidget extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              // TODO: 实现文件下载或查看
+              // TODO: Implement file download or view
             },
             icon: const Icon(Icons.download),
-            tooltip: '下载文件',
+            tooltip: 'Download File',
           ),
         ],
       ),
@@ -351,7 +354,7 @@ class ChatMessageWidget extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '工具调用: ${part.tool}',
+                'Tool Call: ${part.tool}',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
@@ -362,7 +365,7 @@ class ChatMessageWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // 工具状态详情
+          // Tool status details
           _buildToolStateDetails(context, part.state),
         ],
       ),
@@ -392,7 +395,7 @@ class ChatMessageWidget extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '思考过程',
+                'Thinking Process',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   color: Theme.of(context).colorScheme.primary,
@@ -420,22 +423,22 @@ class ChatMessageWidget extends StatelessWidget {
     switch (status) {
       case ToolStatus.pending:
         color = Colors.grey;
-        label = '等待中';
+        label = 'Waiting';
         icon = Icons.schedule;
         break;
       case ToolStatus.running:
         color = Colors.blue;
-        label = '运行中';
+        label = 'Running';
         icon = Icons.play_arrow;
         break;
       case ToolStatus.completed:
         color = Colors.green;
-        label = '已完成';
+        label = 'Completed';
         icon = Icons.check;
         break;
       case ToolStatus.error:
         color = Colors.red;
-        label = '错误';
+        label = 'Error';
         icon = Icons.error;
         break;
     }
@@ -579,13 +582,13 @@ class ChatMessageWidget extends StatelessWidget {
     final difference = now.difference(time);
 
     if (difference.inMinutes < 1) {
-      return '刚刚';
+      return 'Just now';
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}分钟前';
+      return '${difference.inMinutes}m ago';
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}小时前';
+      return '${difference.inHours}h ago';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}天前';
+      return '${difference.inDays}d ago';
     } else {
       return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     }

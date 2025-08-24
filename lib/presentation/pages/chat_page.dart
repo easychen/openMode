@@ -6,7 +6,7 @@ import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
 import '../widgets/chat_session_list.dart';
 
-/// 聊天页面
+/// Chat page
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
 
@@ -29,13 +29,13 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 在这里安全地获取 ChatProvider 引用
+    // Safely get ChatProvider reference here
     _chatProvider ??= context.read<ChatProvider>();
   }
 
   @override
   void dispose() {
-    // 使用保存的引用清理滚动回调
+    // Clean up scroll callback using saved reference
     _chatProvider?.setScrollToBottomCallback(null);
 
     _scrollController.dispose();
@@ -45,10 +45,10 @@ class _ChatPageState extends State<ChatPage> {
   void _loadInitialData() {
     final chatProvider = context.read<ChatProvider>();
 
-    // 设置滚动到底部的回调
+    // Set scroll to bottom callback
     chatProvider.setScrollToBottomCallback(_scrollToBottom);
 
-    // 使用默认工作空间 ID（实际项目中应该从用户配置或服务器获取）
+    // Use default workspace ID (should be obtained from user config or server in actual project)
     const workspaceId = 'default';
     chatProvider.loadSessions(workspaceId);
   }
@@ -56,12 +56,13 @@ class _ChatPageState extends State<ChatPage> {
   void _scrollToBottom() {
     if (!_scrollController.hasClients) return;
 
-    // 智能滚动：只在用户接近底部时才自动滚动
+    // Smart scroll: only auto-scroll when user is near bottom
     final position = _scrollController.position;
-    final threshold = 200.0; // 距离底部200像素内认为是接近底部
+    final threshold =
+        200.0; // Consider within 200 pixels from bottom as near bottom
 
     if (position.maxScrollExtent - position.pixels <= threshold) {
-      // 延迟一帧确保消息已经渲染完成
+      // Delay one frame to ensure message is rendered
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
@@ -99,7 +100,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
             const SizedBox(width: 12),
-            const Text('AI 对话'),
+            const Text('AI Chat'),
           ],
         ),
         actions: [
@@ -126,7 +127,7 @@ class _ChatPageState extends State<ChatPage> {
                       children: [
                         Icon(Icons.arrow_back),
                         SizedBox(width: 8),
-                        Text('返回上一级'),
+                        Text('Back'),
                       ],
                     ),
                   ),
@@ -137,7 +138,7 @@ class _ChatPageState extends State<ChatPage> {
                       children: [
                         Icon(Icons.add),
                         SizedBox(width: 8),
-                        Text('新建对话'),
+                        Text('New Chat'),
                       ],
                     ),
                   ),
@@ -147,7 +148,7 @@ class _ChatPageState extends State<ChatPage> {
                       children: [
                         Icon(Icons.refresh),
                         SizedBox(width: 8),
-                        Text('刷新'),
+                        Text('Refresh'),
                       ],
                     ),
                   ),
@@ -162,7 +163,7 @@ class _ChatPageState extends State<ChatPage> {
         builder: (context, chatProvider, child) {
           return Column(
             children: [
-              // 当前会话信息 - 现代化设计
+              // Current session info - modern design
               if (chatProvider.currentSession != null)
                 Container(
                   width: double.infinity,
@@ -211,7 +212,7 @@ class _ChatPageState extends State<ChatPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          chatProvider.currentSession!.title ?? '新对话',
+                          chatProvider.currentSession!.title ?? 'New Chat',
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.w600),
                           textAlign: TextAlign.center,
@@ -228,10 +229,10 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
 
-              // 消息列表
+              // Message list
               Expanded(child: _buildMessageList(chatProvider)),
 
-              // 输入框
+              // Input field
               ChatInputWidget(
                 onSendMessage: (text) async {
                   await chatProvider.sendMessage(text);
@@ -255,13 +256,13 @@ class _ChatPageState extends State<ChatPage> {
           return Column(
             children: [
               AppBar(
-                title: const Text('对话列表'),
+                title: const Text('Conversations'),
                 automaticallyImplyLeading: false,
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: _createNewSession,
-                    tooltip: '新建对话',
+                    tooltip: 'New Chat',
                   ),
                 ],
               ),
@@ -271,7 +272,7 @@ class _ChatPageState extends State<ChatPage> {
                   currentSession: chatProvider.currentSession,
                   onSessionSelected: (session) {
                     chatProvider.selectSession(session);
-                    Navigator.of(context).pop(); // 关闭抽屉
+                    Navigator.of(context).pop(); // Close drawer
                   },
                   onSessionDeleted: (session) {
                     chatProvider.deleteSession(session.id);
@@ -303,7 +304,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              chatProvider.errorMessage ?? '发生错误',
+              chatProvider.errorMessage ?? 'An error occurred',
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
@@ -313,7 +314,7 @@ class _ChatPageState extends State<ChatPage> {
                 chatProvider.clearError();
                 chatProvider.refresh();
               },
-              child: const Text('重试'),
+              child: const Text('Retry'),
             ),
           ],
         ),
@@ -332,7 +333,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              '选择或创建一个对话开始聊天',
+              'Select or create a conversation to start chatting',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -341,7 +342,7 @@ class _ChatPageState extends State<ChatPage> {
             ElevatedButton.icon(
               onPressed: _createNewSession,
               icon: const Icon(Icons.add),
-              label: const Text('新建对话'),
+              label: const Text('New Chat'),
             ),
           ],
         ),
@@ -360,12 +361,12 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              '你好！我是你的 AI 助手',
+              'Hello! I am your AI assistant',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              '有什么可以帮助你的吗？',
+              'How can I help you?',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -386,12 +387,12 @@ class _ChatPageState extends State<ChatPage> {
           final message = chatProvider.messages[index];
           return ChatMessageWidget(key: ValueKey(message.id), message: message);
         } else {
-          // 显示加载指示器
+          // Show loading indicator
           return Container(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const SizedBox(width: 40), // 头像占位
+                const SizedBox(width: 40), // Avatar placeholder
                 const SizedBox(width: 12),
                 const SizedBox(
                   width: 16,
@@ -400,7 +401,7 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '正在思考中...',
+                  'Thinking...',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -416,7 +417,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _createNewSession() async {
     final chatProvider = context.read<ChatProvider>();
 
-    // 使用默认工作空间 ID（实际项目中应该从用户配置或服务器获取）
+    // Use default workspace ID (should be obtained from user config or server in actual project)
     const workspaceId = 'default';
     await chatProvider.createNewSession(workspaceId);
   }

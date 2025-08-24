@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 允许明文 HTTP 流量 -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain> <!-- Android 模拟器默认主机地址 -->
+        <domain includeSubdomains="false">192.168.1.1</domain> <!-- 常用局域网地址范围 -->
+        <domain includeSubdomains="true">192.168.0.0</domain>
+        <domain includeSubdomains="true">10.0.0.0</domain>
+    </domain-config>
+    
+    <!-- 对于生产环境，建议仅允许 HTTPS -->
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

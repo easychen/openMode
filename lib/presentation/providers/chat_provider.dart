@@ -176,7 +176,7 @@ class ChatProvider extends ChangeNotifier {
 
     if (sessionDate == today) {
       // 今天的对话显示时间
-      return '今天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      return 'Tody ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     } else {
       final difference = today.difference(sessionDate).inDays;
       if (difference == 1) {
@@ -184,12 +184,12 @@ class ChatProvider extends ChangeNotifier {
         return '昨天 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else if (difference < 7) {
         // 一周内的对话显示星期几
-        final weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         final weekday = weekdays[time.weekday - 1];
         return '$weekday ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       } else {
         // 更早的对话显示日期
-        return '${time.month}月${time.day}日 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+        return '${time.month}/${time.day} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
       }
     }
   }

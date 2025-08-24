@@ -6,15 +6,15 @@ import '../models/chat_message_model.dart';
 import '../models/chat_session_model.dart';
 import '../../core/errors/exceptions.dart';
 
-/// 聊天远程数据源
+/// Chat remote data source
 abstract class ChatRemoteDataSource {
-  /// 获取会话列表
+  /// Get session list
   Future<List<ChatSessionModel>> getSessions(String workspaceId);
 
-  /// 获取会话详情
+  /// Get session details
   Future<ChatSessionModel> getSession(String sessionId);
 
-  /// 创建会话
+  /// Create session
   Future<ChatSessionModel> createSession(SessionCreateInputModel input);
 
   /// 更新会话
@@ -62,7 +62,7 @@ abstract class ChatRemoteDataSource {
   Future<void> summarizeSession(String sessionId);
 }
 
-/// 聊天远程数据源实现
+/// Chat remote data source实现
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   const ChatRemoteDataSourceImpl({required this.dio});
 

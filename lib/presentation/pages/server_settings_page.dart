@@ -4,7 +4,7 @@ import '../providers/app_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/api_constants.dart';
 
-/// 服务器设置页面
+/// Server settings page
 class ServerSettingsPage extends StatefulWidget {
   const ServerSettingsPage({Key? key}) : super(key: key);
 
@@ -36,7 +36,7 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('服务器设置'),
+        title: const Text('Server Settings'),
         actions: [
           Consumer<AppProvider>(
             builder: (context, appProvider, child) {
@@ -58,7 +58,7 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 连接状态卡片
+              // Connection status card
               Consumer<AppProvider>(
                 builder: (context, appProvider, child) {
                   return Card(
@@ -81,7 +81,9 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
                               ),
                               const SizedBox(width: AppConstants.smallPadding),
                               Text(
-                                appProvider.isConnected ? '已连接' : '未连接',
+                                appProvider.isConnected
+                                    ? 'Connected'
+                                    : 'Disconnected',
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                             ],
@@ -101,11 +103,11 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
                               appProvider.appInfo != null) ...[
                             const SizedBox(height: AppConstants.smallPadding),
                             Text(
-                              '主机: ${appProvider.appInfo!.hostname}',
+                              'Host: ${appProvider.appInfo!.hostname}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             Text(
-                              '工作目录: ${appProvider.appInfo!.path.cwd}',
+                              'Working Directory: ${appProvider.appInfo!.path.cwd}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -118,7 +120,7 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
 
               const SizedBox(height: AppConstants.defaultPadding),
 
-              // 服务器配置表单
+              // Server configuration form
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -126,22 +128,22 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '服务器配置',
+                        'Server Configuration',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: AppConstants.defaultPadding),
 
-                      // 主机地址输入
+                      // Host address input
                       TextFormField(
                         controller: _hostController,
                         decoration: const InputDecoration(
-                          labelText: '主机地址',
-                          hintText: '例如: 127.0.0.1',
+                          labelText: 'Host Address',
+                          hintText: 'e.g.: 127.0.0.1',
                           prefixIcon: Icon(Icons.computer),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return '请输入主机地址';
+                            return 'Please enter host address';
                           }
                           return null;
                         },
@@ -149,22 +151,22 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
 
                       const SizedBox(height: AppConstants.defaultPadding),
 
-                      // 端口输入
+                      // Port input
                       TextFormField(
                         controller: _portController,
                         decoration: const InputDecoration(
-                          labelText: '端口',
-                          hintText: '例如: 4096',
+                          labelText: 'Port',
+                          hintText: 'e.g.: 4096',
                           prefixIcon: Icon(Icons.settings_ethernet),
                         ),
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return '请输入端口号';
+                            return 'Please enter port number';
                           }
                           final port = int.tryParse(value);
                           if (port == null || port < 1 || port > 65535) {
-                            return '请输入有效的端口号 (1-65535)';
+                            return 'Please enter valid port number (1-65535)';
                           }
                           return null;
                         },
@@ -172,10 +174,10 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
 
                       const SizedBox(height: AppConstants.defaultPadding),
 
-                      // 重置按钮
+                      // Reset button
                       TextButton(
                         onPressed: _resetToDefault,
-                        child: const Text('重置为默认值'),
+                        child: const Text('Reset to Default'),
                       ),
                     ],
                   ),
@@ -184,14 +186,14 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
 
               const SizedBox(height: AppConstants.defaultPadding),
 
-              // 保存和测试按钮
+              // Save and test buttons
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _saveSettings,
                       icon: const Icon(Icons.save),
-                      label: const Text('保存设置'),
+                      label: const Text('Save'),
                     ),
                   ),
                   const SizedBox(width: AppConstants.smallPadding),
@@ -199,7 +201,7 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
                     child: ElevatedButton.icon(
                       onPressed: _testConnection,
                       icon: const Icon(Icons.wifi_find),
-                      label: const Text('测试连接'),
+                      label: const Text('Test'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(
                           context,
@@ -219,7 +221,7 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
     );
   }
 
-  /// 保存设置
+  /// Save settings
   Future<void> _saveSettings() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -232,37 +234,40 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
     if (success && mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('设置已保存')));
+      ).showSnackBar(const SnackBar(content: Text('Settings saved')));
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('保存失败: ${appProvider.errorMessage}'),
+          content: Text('Save failed: ${appProvider.errorMessage}'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
   }
 
-  /// 测试连接
+  /// Test connection
   void _testConnection() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // 先保存设置
+    // Save settings first
     await _saveSettings();
 
-    // 然后测试连接
+    // Then test connection
     final appProvider = context.read<AppProvider>();
     await appProvider.getAppInfo();
 
     if (mounted) {
       if (appProvider.isConnected) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('连接成功!'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('Connection successful!'),
+            backgroundColor: Colors.green,
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('连接失败: ${appProvider.errorMessage}'),
+            content: Text('Connection failed: ${appProvider.errorMessage}'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -270,20 +275,22 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
     }
   }
 
-  /// 检查连接
+  /// Check connection
   void _checkConnection() async {
     final appProvider = context.read<AppProvider>();
     await appProvider.checkConnection();
 
     if (mounted) {
-      final message = appProvider.isConnected ? '连接正常' : '连接失败';
+      final message = appProvider.isConnected
+          ? 'Connection OK'
+          : 'Connection failed';
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
-  /// 重置为默认值
+  /// Reset to default values
   void _resetToDefault() {
     _hostController.text = ApiConstants.defaultHost;
     _portController.text = ApiConstants.defaultPort.toString();

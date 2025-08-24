@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 聊天输入组件
+/// Chat input widget
 class ChatInputWidget extends StatefulWidget {
   const ChatInputWidget({
     super.key,
@@ -75,7 +75,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              // 附件按钮 - 现代化设计
+              // Attachment button - modern design
               Container(
                 decoration: BoxDecoration(
                   color: Theme.of(
@@ -111,7 +111,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
               const SizedBox(width: 12),
 
-              // 输入框 - 现代化设计
+              // Input field - modern design
               Expanded(
                 child: Container(
                   constraints: const BoxConstraints(
@@ -165,7 +165,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                     onSubmitted: (_) => _handleSendMessage(),
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: InputDecoration(
-                      hintText: '输入消息...',
+                      hintText: 'Type a message...',
                       hintStyle: TextStyle(
                         color: Theme.of(
                           context,
@@ -183,7 +183,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
               const SizedBox(width: 12),
 
-              // 发送按钮 - 现代化设计
+              // Send button - modern design
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
@@ -264,7 +264,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('选择图片'),
+              title: const Text('Select Image'),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickImage();
@@ -272,7 +272,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             ),
             ListTile(
               leading: const Icon(Icons.insert_drive_file),
-              title: const Text('选择文件'),
+              title: const Text('Select File'),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickFile();
@@ -280,7 +280,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('拍照'),
+              title: const Text('Take Photo'),
               onTap: () {
                 Navigator.of(context).pop();
                 _takePhoto();
@@ -293,23 +293,23 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _pickImage() {
-    // TODO: 实现图片选择功能
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('图片选择功能待实现')));
+    // TODO: Implement image selection functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Image selection feature coming soon')),
+    );
   }
 
   void _pickFile() {
-    // TODO: 实现文件选择功能
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('文件选择功能待实现')));
+    // TODO: Implement file selection functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('File selection feature coming soon')),
+    );
   }
 
   void _takePhoto() {
-    // TODO: 实现拍照功能
+    // TODO: Implement camera functionality
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('拍照功能待实现')));
+    ).showSnackBar(const SnackBar(content: Text('Camera feature coming soon')));
   }
 }

@@ -23,16 +23,16 @@ import '../../presentation/providers/chat_provider.dart';
 
 final sl = GetIt.instance;
 
-/// 初始化依赖注入
+/// Initialize dependency injection
 Future<void> init() async {
-  // 外部依赖
+  // External dependencies
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
 
-  // 网络
+  // Network
   sl.registerLazySingleton(() => DioClient());
 
-  // 数据源
+  // Data sources
   sl.registerLazySingleton<AppRemoteDataSource>(
     () => AppRemoteDataSourceImpl(dio: sl<DioClient>().dio),
   );
@@ -45,7 +45,7 @@ Future<void> init() async {
     () => ChatRemoteDataSourceImpl(dio: sl<DioClient>().dio),
   );
 
-  // 仓库
+  // Repositories
   sl.registerLazySingleton<AppRepository>(
     () => AppRepositoryImpl(
       remoteDataSource: sl(),
@@ -58,7 +58,7 @@ Future<void> init() async {
     () => ChatRepositoryImpl(remoteDataSource: sl()),
   );
 
-  // 用例
+  // Use cases
   sl.registerLazySingleton(() => GetAppInfo(sl()));
   sl.registerLazySingleton(() => CheckConnection(sl()));
   sl.registerLazySingleton(() => UpdateServerConfig(sl()));
@@ -69,7 +69,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetProviders(sl()));
   sl.registerLazySingleton(() => DeleteChatSession(sl()));
 
-  // 状态管理
+  // State management
   sl.registerFactory(
     () => AppProvider(
       getAppInfo: sl(),
@@ -89,16 +89,16 @@ Future<void> init() async {
     ),
   );
 
-  // 加载本地配置
+  // Load local configuration
   await _loadLocalConfig();
 }
 
-/// 加载本地配置
+/// Load local configuration
 Future<void> _loadLocalConfig() async {
   final localDataSource = sl<AppLocalDataSource>();
   final dioClient = sl<DioClient>();
 
-  // 获取保存的服务器配置
+  // Get saved server configuration
   final host = await localDataSource.getServerHost();
   final port = await localDataSource.getServerPort();
 

@@ -7,7 +7,7 @@ import 'chat_page.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection_container.dart';
 
-/// 主页面
+/// Home page
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // 页面加载时检查连接状态
+    // Check connection status when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppProvider>().checkConnection();
     });
@@ -59,11 +59,22 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(width: 12),
-            const Text('OpenCode Mobile'),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(AppConstants.appName),
+                Text(
+                  AppConstants.appSubtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
         actions: [
-          // 连接状态指示器 - 现代化设计
+          // Connection status indicator - modern design
           Consumer<AppProvider>(
             builder: (context, appProvider, child) {
               return Container(
@@ -116,7 +127,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-          // 设置按钮 - 现代化设计
+          // Settings button - modern design
           Container(
             margin: const EdgeInsets.only(right: 8),
             child: Material(
@@ -167,7 +178,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 构建需要连接的界面 - 现代化设计
+  /// Build connection required interface - modern design
   Widget _buildConnectionRequired() {
     return Container(
       decoration: BoxDecoration(
@@ -186,7 +197,7 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 连接状态图标 - 现代化设计
+              // Connection status icon - modern design
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -211,7 +222,7 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: AppConstants.largePadding),
 
-              // 主标题
+              // Main title
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -231,7 +242,7 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '需要连接到 OpenCode 服务器',
+                  'Need to connect to OpenCode server',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -242,9 +253,9 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: AppConstants.defaultPadding),
 
-              // 副标题
+              // Subtitle
               Text(
-                '请配置服务器地址和端口以开始使用 AI 助手',
+                'Please configure server address and port to start using AI assistant',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.4,
@@ -254,7 +265,7 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: AppConstants.largePadding * 1.5),
 
-              // 配置按钮 - 现代化设计
+              // Configure button - modern design
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -296,7 +307,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   icon: const Icon(Icons.settings_rounded, color: Colors.white),
                   label: const Text(
-                    '配置服务器',
+                    'Configure Server',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -312,7 +323,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 构建已连接的内容 - 现代化设计
+  /// Build connected content - modern design
   Widget _buildConnectedContent() {
     return Container(
       decoration: BoxDecoration(
@@ -330,7 +341,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 欢迎卡片 - 现代化设计
+            // Welcome card - modern design
             Container(
               padding: const EdgeInsets.all(AppConstants.defaultPadding * 1.5),
               decoration: BoxDecoration(
@@ -394,7 +405,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: AppConstants.defaultPadding),
                       Expanded(
                         child: Text(
-                          '已连接到 OpenCode',
+                          'Connected to OpenCode',
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.w700,
@@ -424,14 +435,14 @@ class _HomePageState extends State<HomePage> {
                               _buildInfoRow(
                                 context,
                                 Icons.dns_rounded,
-                                '服务器',
+                                'Server',
                                 appProvider.serverUrl,
                               ),
                               const SizedBox(height: 8),
                               _buildInfoRow(
                                 context,
                                 Icons.computer_rounded,
-                                '主机',
+                                'Host',
                                 appProvider.appInfo!.hostname,
                               ),
                             ],
@@ -447,7 +458,7 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: AppConstants.largePadding),
 
-            // 功能菜单标题 - 现代化设计
+            // Feature menu title - modern design
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Row(
@@ -469,7 +480,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    '功能',
+                    'Features',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
@@ -491,8 +502,8 @@ class _HomePageState extends State<HomePage> {
                   _buildFeatureCard(
                     context,
                     icon: Icons.psychology_rounded,
-                    title: 'AI 对话',
-                    subtitle: '与 AI 助手聊天',
+                    title: 'AI Chat',
+                    subtitle: 'Chat with AI assistant',
                     gradientColors: [
                       Theme.of(context).colorScheme.primary,
                       Theme.of(context).colorScheme.tertiary,
@@ -504,8 +515,8 @@ class _HomePageState extends State<HomePage> {
                   _buildFeatureCard(
                     context,
                     icon: Icons.folder_rounded,
-                    title: '文件管理',
-                    subtitle: '浏览和编辑文件',
+                    title: 'File Management',
+                    subtitle: 'Browse and edit files',
                     gradientColors: [
                       Theme.of(context).colorScheme.secondary,
                       Theme.of(context).colorScheme.secondary.withOpacity(0.7),
@@ -517,8 +528,8 @@ class _HomePageState extends State<HomePage> {
                   _buildFeatureCard(
                     context,
                     icon: Icons.history_rounded,
-                    title: '会话历史',
-                    subtitle: '查看历史对话',
+                    title: 'Chat History',
+                    subtitle: 'View chat history',
                     gradientColors: [
                       Theme.of(context).colorScheme.tertiary,
                       Theme.of(context).colorScheme.tertiary.withOpacity(0.7),
@@ -530,8 +541,8 @@ class _HomePageState extends State<HomePage> {
                   _buildFeatureCard(
                     context,
                     icon: Icons.smart_toy_rounded,
-                    title: 'AI 代理',
-                    subtitle: '选择 AI 代理',
+                    title: 'AI Agents',
+                    subtitle: 'Select AI agents',
                     gradientColors: [
                       Theme.of(context).colorScheme.primary.withOpacity(0.8),
                       Theme.of(context).colorScheme.secondary.withOpacity(0.8),
@@ -549,7 +560,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 构建功能卡片 - 现代化设计
+  /// Build feature card - modern design
   Widget _buildFeatureCard(
     BuildContext context, {
     required IconData icon,
@@ -590,7 +601,7 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 图标容器 - 现代化设计
+                // Icon container - modern design
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -613,7 +624,7 @@ class _HomePageState extends State<HomePage> {
 
                 const SizedBox(height: AppConstants.defaultPadding),
 
-                // 标题
+                // Title
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -625,7 +636,7 @@ class _HomePageState extends State<HomePage> {
 
                 const SizedBox(height: 6),
 
-                // 副标题
+                // Subtitle
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -644,7 +655,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 构建信息行
+  /// Build info row
   Widget _buildInfoRow(
     BuildContext context,
     IconData icon,
@@ -675,7 +686,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 导航到聊天页面
+  /// Navigate to chat page
   void _navigateToChat(BuildContext context) {
     Navigator.push(
       context,
@@ -688,10 +699,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 显示即将推出提示
+  /// Show coming soon message
   void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('功能开发中，敬请期待！')));
+    ).showSnackBar(const SnackBar(content: Text('Feature coming soon!')));
   }
 }

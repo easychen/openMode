@@ -82,25 +82,25 @@ class AppRepositoryImpl implements AppRepository {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return const NetworkFailure('连接超时');
+        return const NetworkFailure('Connection timeout');
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
         if (statusCode != null) {
           if (statusCode >= 400 && statusCode < 500) {
-            return NetworkFailure('客户端错误', statusCode);
+            return NetworkFailure('Client error', statusCode);
           } else if (statusCode >= 500) {
-            return ServerFailure('服务器错误', statusCode);
+            return ServerFailure('Server error', statusCode);
           }
         }
-        return const ServerFailure('响应错误');
+        return const ServerFailure('Response error');
       case DioExceptionType.cancel:
-        return const NetworkFailure('请求被取消');
+        return const NetworkFailure('Request cancelled');
       case DioExceptionType.connectionError:
-        return const NetworkFailure('网络连接错误');
+        return const NetworkFailure('Network connection error');
       case DioExceptionType.unknown:
-        return NetworkFailure('未知网络错误: ${e.message}');
+        return NetworkFailure('Unknown network error: ${e.message}');
       case DioExceptionType.badCertificate:
-        return const NetworkFailure('证书错误');
+        return const NetworkFailure('Certificate error');
     }
   }
 
