@@ -3,6 +3,7 @@
 ![](./assets/images/logo.256.png)
 
 > 🚧 [WIP] This app is a work in progress, and only basic features are implemented.
+
 > 🤖 [Vibe Project] The vast majority of the code was implemented by Cursor.
 
 **Mobile App for OpenCode and more**
