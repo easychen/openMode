@@ -10,6 +10,12 @@
 
 OpenMode is a mobile client for [OpenCode](https://github.com/sst/opencode) (and more, maybe). Built with Flutter, it provides a seamless and intuitive interface for interacting with AI assistants, managing code projects, and enhancing your development workflow on the go.
 
+
+
+https://github.com/user-attachments/assets/75236c93-5741-4b51-ab45-9fdf7900f0ae
+
+
+
 ## ✨ Features
 
 - 🤖 **AI Chat Interface**: Engage in natural conversations with AI assistants
