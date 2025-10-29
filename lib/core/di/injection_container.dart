@@ -18,8 +18,12 @@ import '../../domain/usecases/delete_chat_session.dart';
 import '../../data/datasources/chat_remote_datasource.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/repositories/chat_repository.dart';
+import '../../data/datasources/project_remote_datasource.dart';
+import '../../data/repositories/project_repository_impl.dart';
+import '../../domain/repositories/project_repository.dart';
 import '../../presentation/providers/app_provider.dart';
 import '../../presentation/providers/chat_provider.dart';
+import '../../presentation/providers/project_provider.dart';
 
 final sl = GetIt.instance;
 
@@ -45,6 +49,10 @@ Future<void> init() async {
     () => ChatRemoteDataSourceImpl(dio: sl<DioClient>().dio),
   );
 
+  sl.registerLazySingleton<ProjectRemoteDataSource>(
+    () => ProjectRemoteDataSourceImpl(dio: sl<DioClient>().dio),
+  );
+
   // Repositories
   sl.registerLazySingleton<AppRepository>(
     () => AppRepositoryImpl(
@@ -56,6 +64,10 @@ Future<void> init() async {
 
   sl.registerLazySingleton<ChatRepository>(
     () => ChatRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  sl.registerLazySingleton<ProjectRepository>(
+    () => ProjectRepositoryImpl(remoteDataSource: sl()),
   );
 
   // Use cases
@@ -86,7 +98,13 @@ Future<void> init() async {
       getChatMessages: sl(),
       getProviders: sl(),
       deleteChatSession: sl(),
+      projectProvider: sl(),
+      localDataSource: sl(),
     ),
+  );
+
+  sl.registerFactory(
+    () => ProjectProvider(projectRepository: sl()),
   );
 
   // Load local configuration

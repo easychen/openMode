@@ -221,13 +221,13 @@ class AgentInputSource extends Equatable {
 
 /// 会话创建输入
 class SessionCreateInput extends Equatable {
-  const SessionCreateInput({required this.workspaceId, this.title});
+  const SessionCreateInput({this.parentId, this.title});
 
-  final String workspaceId;
+  final String? parentId;
   final String? title;
 
   @override
-  List<Object?> get props => [workspaceId, title];
+  List<Object?> get props => [parentId, title];
 }
 
 /// 会话更新输入

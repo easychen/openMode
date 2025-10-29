@@ -221,13 +221,14 @@ class ChatInputPartModel {
 @JsonSerializable()
 class SessionCreateInputModel {
   const SessionCreateInputModel({
-    required this.workspaceId,
-    required this.title,
+    this.parentId,
+    this.title,
   });
 
-  @JsonKey(name: 'workspaceID')
-  final String workspaceId;
-  final String title;
+  @JsonKey(name: 'parentID', includeIfNull: false)
+  final String? parentId;
+  @JsonKey(includeIfNull: false)
+  final String? title;
 
   factory SessionCreateInputModel.fromJson(Map<String, dynamic> json) =>
       _$SessionCreateInputModelFromJson(json);
@@ -236,7 +237,7 @@ class SessionCreateInputModel {
 
   static SessionCreateInputModel fromDomain(SessionCreateInput input) {
     return SessionCreateInputModel(
-      workspaceId: input.workspaceId,
+      parentId: input.parentId,
       title: input.title ?? '新对话',
     );
   }

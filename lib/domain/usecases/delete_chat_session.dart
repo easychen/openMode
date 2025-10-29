@@ -4,8 +4,12 @@ import '../../core/errors/failures.dart';
 
 /// 删除聊天会话参数
 class DeleteChatSessionParams {
-  const DeleteChatSessionParams({required this.sessionId});
+  const DeleteChatSessionParams({
+    required this.projectId,
+    required this.sessionId,
+  });
 
+  final String projectId;
   final String sessionId;
 }
 
@@ -17,6 +21,6 @@ class DeleteChatSession {
 
   /// 执行删除会话
   Future<Either<Failure, void>> call(DeleteChatSessionParams params) async {
-    return await repository.deleteSession(params.sessionId);
+    return await repository.deleteSession(params.projectId, params.sessionId);
   }
 }

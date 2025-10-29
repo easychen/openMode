@@ -373,6 +373,11 @@ class ChatMessageWidget extends StatelessWidget {
   }
 
   Widget _buildReasoningPart(BuildContext context, ReasoningPart part) {
+    // Don't display if reasoning text is empty or only whitespace
+    if (part.text.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),

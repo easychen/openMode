@@ -6,17 +6,17 @@ import '../entities/provider.dart';
 /// 应用仓库接口
 abstract class AppRepository {
   /// 获取应用信息
-  Future<Either<Failure, AppInfo>> getAppInfo();
+  Future<Either<Failure, AppInfo>> getAppInfo({String? directory});
 
   /// 初始化应用
-  Future<Either<Failure, bool>> initializeApp();
+  Future<Either<Failure, bool>> initializeApp({String? directory});
 
   /// 检查服务器连接
-  Future<Either<Failure, bool>> checkConnection();
+  Future<Either<Failure, bool>> checkConnection({String? directory});
 
   /// 更新服务器配置
   Future<Either<Failure, void>> updateServerConfig(String host, int port);
 
   /// 获取提供商信息
-  Future<Either<Failure, ProvidersResponse>> getProviders();
+  Future<Either<Failure, ProvidersResponse>> getProviders({String? directory});
 }

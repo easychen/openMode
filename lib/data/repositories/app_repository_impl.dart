@@ -21,9 +21,9 @@ class AppRepositoryImpl implements AppRepository {
   });
 
   @override
-  Future<Either<Failure, AppInfo>> getAppInfo() async {
+  Future<Either<Failure, AppInfo>> getAppInfo({String? directory}) async {
     try {
-      final appInfoModel = await remoteDataSource.getAppInfo();
+      final appInfoModel = await remoteDataSource.getAppInfo(directory: directory);
       return Right(appInfoModel.toEntity());
     } on DioException catch (e) {
       return Left(_handleDioException(e));
@@ -33,9 +33,9 @@ class AppRepositoryImpl implements AppRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> initializeApp() async {
+  Future<Either<Failure, bool>> initializeApp({String? directory}) async {
     try {
-      final result = await remoteDataSource.initializeApp();
+      final result = await remoteDataSource.initializeApp(directory: directory);
       return Right(result);
     } on DioException catch (e) {
       return Left(_handleDioException(e));
@@ -45,9 +45,9 @@ class AppRepositoryImpl implements AppRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> checkConnection() async {
+  Future<Either<Failure, bool>> checkConnection({String? directory}) async {
     try {
-      await remoteDataSource.getAppInfo();
+      await remoteDataSource.getAppInfo(directory: directory);
       return const Right(true);
     } on DioException catch (e) {
       return Left(_handleDioException(e));
@@ -105,9 +105,9 @@ class AppRepositoryImpl implements AppRepository {
   }
 
   @override
-  Future<Either<Failure, ProvidersResponse>> getProviders() async {
+  Future<Either<Failure, ProvidersResponse>> getProviders({String? directory}) async {
     try {
-      final providersModel = await remoteDataSource.getProviders();
+      final providersModel = await remoteDataSource.getProviders(directory: directory);
       return Right(providersModel.toDomain());
     } on DioException catch (e) {
       return Left(_handleDioException(e));

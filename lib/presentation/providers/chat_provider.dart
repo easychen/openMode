@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import '../../data/datasources/app_local_datasource.dart';
+import '../../data/models/chat_session_model.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/provider.dart';
@@ -10,6 +13,7 @@ import '../../domain/usecases/get_chat_messages.dart';
 import '../../domain/usecases/get_providers.dart';
 import '../../domain/usecases/delete_chat_session.dart';
 import '../../core/errors/failures.dart';
+import 'project_provider.dart';
 
 /// 聊天状态
 enum ChatState { initial, loading, loaded, error, sending }
@@ -23,6 +27,8 @@ class ChatProvider extends ChangeNotifier {
     required this.getChatMessages,
     required this.getProviders,
     required this.deleteChatSession,
+    required this.projectProvider,
+    required this.localDataSource,
   });
 
   // 滚动回调
@@ -34,6 +40,8 @@ class ChatProvider extends ChangeNotifier {
   final GetChatMessages getChatMessages;
   final GetProviders getProviders;
   final DeleteChatSession deleteChatSession;
+  final ProjectProvider projectProvider;
+  final AppLocalDataSource localDataSource;
 
   ChatState _state = ChatState.initial;
   List<ChatSession> _sessions = [];
@@ -42,7 +50,8 @@ class ChatProvider extends ChangeNotifier {
   String? _errorMessage;
   StreamSubscription<dynamic>? _messageSubscription;
 
-  // 提供商相关状态
+  // 项目和提供商相关状态
+  String? _currentProjectId;
   List<Provider> _providers = [];
   Map<String, String> _defaultModels = {};
   String? _selectedProviderId;
@@ -54,6 +63,7 @@ class ChatProvider extends ChangeNotifier {
   ChatSession? get currentSession => _currentSession;
   List<ChatMessage> get messages => _messages;
   String? get errorMessage => _errorMessage;
+  String? get currentProjectId => _currentProjectId;
   List<Provider> get providers => _providers;
   Map<String, String> get defaultModels => _defaultModels;
   String? get selectedProviderId => _selectedProviderId;
@@ -130,21 +140,98 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// 加载会话列表
-  Future<void> loadSessions(String workspaceId) async {
+  Future<void> loadSessions() async {
+    if (_state == ChatState.loading) return;
+    
     _setState(ChatState.loading);
+    clearError();
 
-    final result = await getChatSessions(
-      GetChatSessionsParams(workspaceId: workspaceId),
-    );
+    try {
+      // 首先尝试从缓存加载
+      await _loadCachedSessions();
+      
+      // 然后从服务器获取最新数据
+      final result = await getChatSessions();
+      
+      result.fold(
+        (failure) => _handleFailure(failure),
+        (sessions) async {
+          _sessions = sessions;
+          _setState(ChatState.loaded);
+          
+          // 保存到缓存
+          await _saveCachedSessions(sessions);
+          
+          // 恢复上次选择的会话
+          await loadLastSession();
+        },
+      );
+    } catch (e) {
+      _setError('加载会话列表失败: ${e.toString()}');
+    }
+  }
 
-    result.fold((failure) => _handleFailure(failure), (sessions) {
-      _sessions = sessions;
-      _setState(ChatState.loaded);
-    });
+  /// 从缓存加载会话列表
+  Future<void> _loadCachedSessions() async {
+    try {
+      final cachedData = await localDataSource.getCachedSessions();
+      if (cachedData != null) {
+        final List<dynamic> jsonList = json.decode(cachedData);
+        final cachedSessions = jsonList
+            .map((json) => ChatSessionModel.fromJson(json).toDomain())
+            .toList();
+        
+        if (cachedSessions.isNotEmpty) {
+          _sessions = cachedSessions;
+          _setState(ChatState.loaded);
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      print('加载缓存会话失败: $e');
+    }
+  }
+
+  /// 保存会话列表到缓存
+  Future<void> _saveCachedSessions(List<ChatSession> sessions) async {
+    try {
+      final jsonList = sessions
+          .map((session) => ChatSessionModel.fromDomain(session).toJson())
+          .toList();
+      final jsonString = json.encode(jsonList);
+      await localDataSource.saveCachedSessions(jsonString);
+    } catch (e) {
+      print('保存会话缓存失败: $e');
+    }
+  }
+
+  /// 保存当前会话ID
+  Future<void> _saveCurrentSessionId(String sessionId) async {
+    try {
+      await localDataSource.saveCurrentSessionId(sessionId);
+    } catch (e) {
+      print('保存当前会话ID失败: $e');
+    }
+  }
+
+  /// 加载上次选择的会话
+  Future<void> loadLastSession() async {
+    try {
+      final sessionId = await localDataSource.getCurrentSessionId();
+      if (sessionId != null) {
+        final session = _sessions.where((s) => s.id == sessionId).firstOrNull;
+        if (session != null) {
+          await selectSession(session);
+        }
+      }
+    } catch (e) {
+      print('加载上次会话失败: $e');
+    }
   }
 
   /// 创建新会话
-  Future<void> createNewSession(String workspaceId, {String? title}) async {
+  Future<void> createNewSession({String? parentId, String? title}) async {
+    final projectId = projectProvider.currentProjectId;
     _setState(ChatState.loading);
 
     // 生成基于时间的标题
@@ -153,8 +240,9 @@ class ChatProvider extends ChangeNotifier {
 
     final result = await createChatSession(
       CreateChatSessionParams(
+        projectId: projectId,
         input: SessionCreateInput(
-          workspaceId: workspaceId,
+          parentId: parentId,
           title: defaultTitle,
         ),
       ),
@@ -203,16 +291,24 @@ class ChatProvider extends ChangeNotifier {
     _currentSession = session;
     notifyListeners();
 
+    // 保存当前会话ID
+    await _saveCurrentSessionId(session.id);
+
     // 加载新会话的消息
     await loadMessages(session.id);
   }
 
   /// 加载消息列表
   Future<void> loadMessages(String sessionId) async {
+    if (_currentProjectId == null) return; // 确保有项目ID
+    
     _setState(ChatState.loading);
 
     final result = await getChatMessages(
-      GetChatMessagesParams(sessionId: sessionId),
+      GetChatMessagesParams(
+        projectId: _currentProjectId!,
+        sessionId: sessionId,
+      ),
     );
 
     result.fold((failure) => _handleFailure(failure), (messages) {
@@ -271,7 +367,11 @@ class ChatProvider extends ChangeNotifier {
     // 发送消息并监听流式响应
     _messageSubscription =
         sendChatMessage(
-          SendChatMessageParams(sessionId: _currentSession!.id, input: input),
+          SendChatMessageParams(
+            projectId: _currentProjectId!,
+            sessionId: _currentSession!.id, 
+            input: input,
+          ),
         ).listen(
           (result) {
             result.fold((failure) => _handleFailure(failure), (message) {
@@ -347,8 +447,13 @@ class ChatProvider extends ChangeNotifier {
 
   /// 删除会话
   Future<void> deleteSession(String sessionId) async {
+    if (_currentProjectId == null) return; // 确保有项目ID
+    
     final result = await deleteChatSession(
-      DeleteChatSessionParams(sessionId: sessionId),
+      DeleteChatSessionParams(
+        projectId: _currentProjectId!,
+        sessionId: sessionId,
+      ),
     );
 
     result.fold((failure) => _handleFailure(failure), (_) {

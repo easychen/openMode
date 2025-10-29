@@ -10,16 +10,18 @@ class GetChatSessions {
   final ChatRepository repository;
 
   /// 执行获取会话列表
-  Future<Either<Failure, List<ChatSession>>> call(
-    GetChatSessionsParams params,
-  ) async {
-    return repository.getSessions(params.workspaceId);
+  Future<Either<Failure, List<ChatSession>>> call([
+    GetChatSessionsParams? params,
+  ]) async {
+    return repository.getSessions(directory: params?.directory);
   }
 }
 
 /// 获取聊天会话列表参数
 class GetChatSessionsParams {
-  const GetChatSessionsParams({required this.workspaceId});
+  const GetChatSessionsParams({
+    this.directory,
+  });
 
-  final String workspaceId;
+  final String? directory;
 }

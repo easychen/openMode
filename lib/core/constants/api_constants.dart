@@ -6,9 +6,9 @@ class ApiConstants {
   static const String defaultBaseUrl = 'http://$defaultHost:$defaultPort';
 
   // API端点
-  static const String appEndpoint = '/app';
+  static const String projectEndpoint = '/project';
+  static const String providerEndpoint = '/provider';
   static const String configEndpoint = '/config';
-  static const String configProvidersEndpoint = '/config/providers';
   static const String sessionEndpoint = '/session';
   static const String agentEndpoint = '/agent';
   static const String fileEndpoint = '/file';

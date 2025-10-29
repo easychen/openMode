@@ -1,16 +1,19 @@
-import '../models/app_info_model.dart';
 import '../models/provider_model.dart';
+import '../models/app_info_model.dart';
 
 /// 应用远程数据源接口
 abstract class AppRemoteDataSource {
   /// 获取应用信息
-  Future<AppInfoModel> getAppInfo();
+  Future<AppInfoModel> getAppInfo({String? directory});
 
   /// 初始化应用
-  Future<bool> initializeApp();
+  Future<bool> initializeApp({String? directory});
 
   /// 获取提供商信息
-  Future<ProvidersResponseModel> getProviders();
+  Future<ProvidersResponseModel> getProviders({String? directory});
+
+  /// 获取配置信息
+  Future<Map<String, dynamic>> getConfig({String? directory});
 }
 
 /// 应用远程数据源实现
@@ -20,21 +23,45 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
   AppRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<AppInfoModel> getAppInfo() async {
-    final response = await dio.get('/app');
-    return AppInfoModel.fromJson(response.data);
-  }
-
-  @override
-  Future<bool> initializeApp() async {
-    final response = await dio.post('/app/init');
-    return response.data as bool;
-  }
-
-  @override
-  Future<ProvidersResponseModel> getProviders() async {
+  Future<AppInfoModel> getAppInfo({String? directory}) async {
     try {
-      final response = await dio.get('/config/providers');
+      final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
+      final response = await dio.get('/app/info', queryParameters: queryParams);
+      return AppInfoModel.fromJson(response.data);
+    } catch (e) {
+      print('获取应用信息时出错: $e');
+      // 返回默认的应用信息
+      return AppInfoModel(
+        hostname: 'localhost',
+        git: false,
+        path: AppPathModel(
+          config: '/config',
+          data: '/data',
+          root: '/',
+          cwd: '/app',
+          state: '/state',
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<bool> initializeApp({String? directory}) async {
+    try {
+      final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
+      final response = await dio.post('/app/init', queryParameters: queryParams);
+      return response.data['success'] ?? true;
+    } catch (e) {
+      print('初始化应用时出错: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<ProvidersResponseModel> getProviders({String? directory}) async {
+    try {
+      final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
+      final response = await dio.get('/provider', queryParameters: queryParams);
       print('Providers API 响应: ${response.data}');
       return ProvidersResponseModel.fromJson(response.data);
     } catch (e) {
@@ -64,5 +91,12 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
         defaultModels: {'moonshotai-cn': 'kimi-k2-turbo-preview'},
       );
     }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getConfig({String? directory}) async {
+    final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
+    final response = await dio.get('/config', queryParameters: queryParams);
+    return response.data as Map<String, dynamic>;
   }
 }

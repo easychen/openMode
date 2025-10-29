@@ -45,6 +45,18 @@ abstract class AppLocalDataSource {
   /// 保存最后的会话ID
   Future<void> saveLastSessionId(String sessionId);
 
+  /// 获取当前会话ID
+  Future<String?> getCurrentSessionId();
+
+  /// 保存当前会话ID
+  Future<void> saveCurrentSessionId(String sessionId);
+
+  /// 获取缓存的会话列表
+  Future<String?> getCachedSessions();
+
+  /// 保存会话列表到缓存
+  Future<void> saveCachedSessions(String sessionsJson);
+
   /// 清除所有数据
   Future<void> clearAll();
 }
@@ -126,6 +138,26 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   @override
   Future<void> saveLastSessionId(String sessionId) async {
     await sharedPreferences.setString(AppConstants.lastSessionIdKey, sessionId);
+  }
+
+  @override
+  Future<String?> getCurrentSessionId() async {
+    return sharedPreferences.getString(AppConstants.currentSessionIdKey);
+  }
+
+  @override
+  Future<void> saveCurrentSessionId(String sessionId) async {
+    await sharedPreferences.setString(AppConstants.currentSessionIdKey, sessionId);
+  }
+
+  @override
+  Future<String?> getCachedSessions() async {
+    return sharedPreferences.getString(AppConstants.cachedSessionsKey);
+  }
+
+  @override
+  Future<void> saveCachedSessions(String sessionsJson) async {
+    await sharedPreferences.setString(AppConstants.cachedSessionsKey, sessionsJson);
   }
 
   @override

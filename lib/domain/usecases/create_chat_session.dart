@@ -13,13 +13,17 @@ class CreateChatSession {
   Future<Either<Failure, ChatSession>> call(
     CreateChatSessionParams params,
   ) async {
-    return repository.createSession(params.input);
+    return repository.createSession(params.projectId, params.input);
   }
 }
 
 /// 创建聊天会话参数
 class CreateChatSessionParams {
-  const CreateChatSessionParams({required this.input});
+  const CreateChatSessionParams({
+    required this.projectId,
+    required this.input,
+  });
 
+  final String projectId;
   final SessionCreateInput input;
 }

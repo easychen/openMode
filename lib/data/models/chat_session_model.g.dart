@@ -109,15 +109,15 @@ Map<String, dynamic> _$ChatInputPartModelToJson(ChatInputPartModel instance) =>
 SessionCreateInputModel _$SessionCreateInputModelFromJson(
   Map<String, dynamic> json,
 ) => SessionCreateInputModel(
-  workspaceId: json['workspaceID'] as String,
-  title: json['title'] as String,
+  parentId: json['parentID'] as String?,
+  title: json['title'] as String?,
 );
 
 Map<String, dynamic> _$SessionCreateInputModelToJson(
   SessionCreateInputModel instance,
 ) => <String, dynamic>{
-  'workspaceID': instance.workspaceId,
-  'title': instance.title,
+  'parentID': ?instance.parentId,
+  'title': ?instance.title,
 };
 
 SessionUpdateInputModel _$SessionUpdateInputModelFromJson(

@@ -12,14 +12,19 @@ class SendChatMessage {
 
   /// 执行发送消息
   Stream<Either<Failure, ChatMessage>> call(SendChatMessageParams params) {
-    return repository.sendMessage(params.sessionId, params.input);
+    return repository.sendMessage(params.projectId, params.sessionId, params.input);
   }
 }
 
 /// 发送聊天消息参数
 class SendChatMessageParams {
-  const SendChatMessageParams({required this.sessionId, required this.input});
+  const SendChatMessageParams({
+    required this.projectId,
+    required this.sessionId,
+    required this.input,
+  });
 
+  final String projectId;
   final String sessionId;
   final ChatInput input;
 }

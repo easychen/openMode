@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/chat_provider.dart';
+import '../providers/project_provider.dart';
 import 'server_settings_page.dart';
 import 'chat_page.dart';
 import '../../core/constants/app_constants.dart';
@@ -19,9 +20,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Check connection status when page loads
+    // Check connection status and initialize project when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppProvider>().checkConnection();
+      context.read<ProjectProvider>().initializeProject();
     });
   }
 

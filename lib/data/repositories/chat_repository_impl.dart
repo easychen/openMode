@@ -14,11 +14,9 @@ class ChatRepositoryImpl implements ChatRepository {
   final ChatRemoteDataSource remoteDataSource;
 
   @override
-  Future<Either<Failure, List<ChatSession>>> getSessions(
-    String workspaceId,
-  ) async {
+  Future<Either<Failure, List<ChatSession>>> getSessions({String? directory}) async {
     try {
-      final sessions = await remoteDataSource.getSessions(workspaceId);
+      final sessions = await remoteDataSource.getSessions(directory: directory);
       return Right(sessions.map((s) => s.toDomain()).toList());
     } on ServerException {
       return const Left(ServerFailure('获取会话列表失败'));
@@ -30,9 +28,9 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, ChatSession>> getSession(String sessionId) async {
+  Future<Either<Failure, ChatSession>> getSession(String projectId, String sessionId, {String? directory}) async {
     try {
-      final session = await remoteDataSource.getSession(sessionId);
+      final session = await remoteDataSource.getSession(projectId, sessionId, directory: directory);
       return Right(session.toDomain());
     } on NotFoundException {
       return const Left(NotFoundFailure('会话不存在'));
@@ -47,11 +45,13 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, ChatSession>> createSession(
-    SessionCreateInput input,
-  ) async {
+    String projectId,
+    SessionCreateInput input, {
+    String? directory,
+  }) async {
     try {
       final inputModel = SessionCreateInputModel.fromDomain(input);
-      final session = await remoteDataSource.createSession(inputModel);
+      final session = await remoteDataSource.createSession(projectId, inputModel, directory: directory);
       return Right(session.toDomain());
     } on ValidationException {
       return const Left(ValidationFailure('输入参数无效'));
@@ -66,14 +66,18 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, ChatSession>> updateSession(
+    String projectId,
     String sessionId,
-    SessionUpdateInput input,
-  ) async {
+    SessionUpdateInput input, {
+    String? directory,
+  }) async {
     try {
       final inputModel = SessionUpdateInputModel.fromDomain(input);
       final session = await remoteDataSource.updateSession(
+        projectId,
         sessionId,
         inputModel,
+        directory: directory,
       );
       return Right(session.toDomain());
     } on NotFoundException {
@@ -90,9 +94,9 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteSession(String sessionId) async {
+  Future<Either<Failure, void>> deleteSession(String projectId, String sessionId, {String? directory}) async {
     try {
-      await remoteDataSource.deleteSession(sessionId);
+      await remoteDataSource.deleteSession(projectId, sessionId, directory: directory);
       return const Right(null);
     } on NotFoundException {
       return const Left(NotFoundFailure('会话不存在'));
@@ -106,9 +110,9 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, ChatSession>> shareSession(String sessionId) async {
+  Future<Either<Failure, ChatSession>> shareSession(String projectId, String sessionId, {String? directory}) async {
     try {
-      final session = await remoteDataSource.shareSession(sessionId);
+      final session = await remoteDataSource.shareSession(projectId, sessionId, directory: directory);
       return Right(session.toDomain());
     } on NotFoundException {
       return const Left(NotFoundFailure('会话不存在'));
@@ -122,9 +126,9 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, ChatSession>> unshareSession(String sessionId) async {
+  Future<Either<Failure, ChatSession>> unshareSession(String projectId, String sessionId, {String? directory}) async {
     try {
-      final session = await remoteDataSource.unshareSession(sessionId);
+      final session = await remoteDataSource.unshareSession(projectId, sessionId, directory: directory);
       return Right(session.toDomain());
     } on NotFoundException {
       return const Left(NotFoundFailure('会话不存在'));
@@ -139,10 +143,12 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, List<ChatMessage>>> getMessages(
-    String sessionId,
-  ) async {
+    String projectId,
+    String sessionId, {
+    String? directory,
+  }) async {
     try {
-      final messages = await remoteDataSource.getMessages(sessionId);
+      final messages = await remoteDataSource.getMessages(projectId, sessionId, directory: directory);
       return Right(messages.map((m) => m.toDomain()).toList());
     } on NotFoundException {
       return const Left(NotFoundFailure('会话不存在'));
@@ -157,11 +163,13 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, ChatMessage>> getMessage(
+    String projectId,
     String sessionId,
-    String messageId,
-  ) async {
+    String messageId, {
+    String? directory,
+  }) async {
     try {
-      final message = await remoteDataSource.getMessage(sessionId, messageId);
+      final message = await remoteDataSource.getMessage(projectId, sessionId, messageId, directory: directory);
       return Right(message.toDomain());
     } on NotFoundException {
       return const Left(NotFoundFailure('消息不存在'));
@@ -176,12 +184,14 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Stream<Either<Failure, ChatMessage>> sendMessage(
+    String projectId,
     String sessionId,
-    ChatInput input,
-  ) async* {
+    ChatInput input, {
+    String? directory,
+  }) async* {
     try {
       final inputModel = ChatInputModel.fromDomain(input);
-      final messageStream = remoteDataSource.sendMessage(sessionId, inputModel);
+      final messageStream = remoteDataSource.sendMessage(projectId, sessionId, inputModel, directory: directory);
 
       await for (final message in messageStream) {
         yield Right(message.toDomain());
@@ -200,9 +210,9 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, void>> abortSession(String sessionId) async {
+  Future<Either<Failure, void>> abortSession(String projectId, String sessionId, {String? directory}) async {
     try {
-      await remoteDataSource.abortSession(sessionId);
+      await remoteDataSource.abortSession(projectId, sessionId, directory: directory);
       return const Right(null);
     } on NotFoundException {
       return const Left(NotFoundFailure('会话不存在'));
@@ -217,11 +227,13 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, void>> revertMessage(
+    String projectId,
     String sessionId,
-    String messageId,
-  ) async {
+    String messageId, {
+    String? directory,
+  }) async {
     try {
-      await remoteDataSource.revertMessage(sessionId, messageId);
+      await remoteDataSource.revertMessage(projectId, sessionId, messageId, directory: directory);
       return const Right(null);
     } on NotFoundException {
       return const Left(NotFoundFailure('消息不存在'));
@@ -235,9 +247,9 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, void>> unrevertMessages(String sessionId) async {
+  Future<Either<Failure, void>> unrevertMessages(String projectId, String sessionId, {String? directory}) async {
     try {
-      await remoteDataSource.unrevertMessages(sessionId);
+      await remoteDataSource.unrevertMessages(projectId, sessionId, directory: directory);
       return const Right(null);
     } on NotFoundException {
       return const Left(NotFoundFailure('会话不存在'));
@@ -252,17 +264,21 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, void>> initSession(
+    String projectId,
     String sessionId, {
     required String messageId,
     required String providerId,
     required String modelId,
+    String? directory,
   }) async {
     try {
       await remoteDataSource.initSession(
+        projectId,
         sessionId,
         messageId: messageId,
         providerId: providerId,
         modelId: modelId,
+        directory: directory,
       );
       return const Right(null);
     } on NotFoundException {
@@ -279,9 +295,9 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<Either<Failure, void>> summarizeSession(String sessionId) async {
+  Future<Either<Failure, void>> summarizeSession(String projectId, String sessionId, {String? directory}) async {
     try {
-      await remoteDataSource.summarizeSession(sessionId);
+      await remoteDataSource.summarizeSession(projectId, sessionId, directory: directory);
       return const Right(null);
     } on NotFoundException {
       return const Left(NotFoundFailure('会话不存在'));

@@ -8,7 +8,9 @@ import '../widgets/chat_session_list.dart';
 
 /// Chat page
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  final String? projectId;
+  
+  const ChatPage({super.key, this.projectId});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -48,9 +50,22 @@ class _ChatPageState extends State<ChatPage> {
     // Set scroll to bottom callback
     chatProvider.setScrollToBottomCallback(_scrollToBottom);
 
-    // Use default workspace ID (should be obtained from user config or server in actual project)
-    const workspaceId = 'default';
-    chatProvider.loadSessions(workspaceId);
+    // 初始化提供商并加载会话
+    _initializeChatProvider(chatProvider);
+  }
+
+  Future<void> _initializeChatProvider(ChatProvider chatProvider) async {
+    try {
+      // 首先初始化提供商
+      await chatProvider.initializeProviders();
+      
+      // 然后加载会话列表
+      await chatProvider.loadSessions();
+    } catch (e) {
+      // 如果初始化失败，设置错误状态
+      chatProvider.clearError();
+      print('聊天初始化失败: $e');
+    }
   }
 
   void _scrollToBottom({bool force = false}) {
@@ -432,8 +447,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _createNewSession() async {
     final chatProvider = context.read<ChatProvider>();
 
-    // Use default workspace ID (should be obtained from user config or server in actual project)
-    const workspaceId = 'default';
-    await chatProvider.createNewSession(workspaceId);
+    // 根据新的 API 规范，不再需要 workspaceId，可以选择性地提供 parentId
+    await chatProvider.createNewSession();
   }
 }

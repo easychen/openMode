@@ -13,13 +13,17 @@ class GetChatMessages {
   Future<Either<Failure, List<ChatMessage>>> call(
     GetChatMessagesParams params,
   ) async {
-    return repository.getMessages(params.sessionId);
+    return repository.getMessages(params.projectId, params.sessionId);
   }
 }
 
 /// 获取聊天消息列表参数
 class GetChatMessagesParams {
-  const GetChatMessagesParams({required this.sessionId});
+  const GetChatMessagesParams({
+    required this.projectId,
+    required this.sessionId,
+  });
 
+  final String projectId;
   final String sessionId;
 }
