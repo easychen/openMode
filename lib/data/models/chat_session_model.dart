@@ -248,7 +248,17 @@ class SessionCreateInputModel {
   factory SessionCreateInputModel.fromJson(Map<String, dynamic> json) =>
       _$SessionCreateInputModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$SessionCreateInputModelToJson(this);
+  // 手动实现 toJson 以避免向后端发送 null 字段
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    if (parentId != null) {
+      map['parentID'] = parentId;
+    }
+    if (title != null) {
+      map['title'] = title;
+    }
+    return map;
+  }
 
   static SessionCreateInputModel fromDomain(SessionCreateInput input) {
     return SessionCreateInputModel(
@@ -268,7 +278,14 @@ class SessionUpdateInputModel {
   factory SessionUpdateInputModel.fromJson(Map<String, dynamic> json) =>
       _$SessionUpdateInputModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$SessionUpdateInputModelToJson(this);
+  // 同样避免发送空字段
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    if (title != null) {
+      map['title'] = title;
+    }
+    return map;
+  }
 
   static SessionUpdateInputModel fromDomain(SessionUpdateInput input) {
     return SessionUpdateInputModel(title: input.title);

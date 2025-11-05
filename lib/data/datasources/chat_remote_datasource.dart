@@ -295,11 +295,25 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final response = await dio.get(
         '/session/$sessionId/message',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
+        options: Options(
+          // 会话历史可能较大，提升接收超时以避免 60 秒中断
+          receiveTimeout: const Duration(minutes: 3),
+        ),
       );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        return data.map((json) => ChatMessageModel.fromJson(json)).toList();
+        // Each item follows { info: MessageObject, parts: Part[] }
+        // Flatten to a single map compatible with ChatMessageModel.fromJson
+        return data.map((item) {
+          final map = item as Map<String, dynamic>;
+          final info = (map['info'] as Map<String, dynamic>?) ?? <String, dynamic>{};
+          final parts = (map['parts'] as List<dynamic>?) ?? <dynamic>[];
+          return ChatMessageModel.fromJson({
+            ...info,
+            'parts': parts,
+          });
+        }).toList();
       } else {
         throw const ServerException('服务器错误');
       }
@@ -324,6 +338,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final response = await dio.get(
         '/session/$sessionId/message/$messageId',
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
+        options: Options(
+          // 单条消息也可能较慢，统一提升接收超时
+          receiveTimeout: const Duration(minutes: 3),
+        ),
       );
 
       if (response.statusCode == 200) {

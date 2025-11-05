@@ -102,13 +102,52 @@ class ChatMessageModel {
     // Manually handle completedTime
     final completedTime = _completedTimeFromJson(json['time']);
 
+    // Prepare parts and synthesize text from summary if needed
+    final List<MessagePartModel> computedParts = List<MessagePartModel>.from(model.parts);
+
+    // For UserMessage: server may provide `summary` object without `parts`
+    // We synthesize a text part so UI can display meaningful content.
+    final dynamic summary = json['summary'];
+    if (computedParts.isEmpty && summary is Map<String, dynamic>) {
+      final title = (summary['title'] as String?)?.trim();
+      final body = (summary['body'] as String?)?.trim();
+      final diffs = summary['diffs'] as List<dynamic>?;
+
+      final buffer = StringBuffer();
+      if (title != null && title.isNotEmpty) buffer.writeln(title);
+      if (body != null && body.isNotEmpty) buffer.writeln(body);
+      if (diffs != null && diffs.isNotEmpty) {
+        for (final d in diffs) {
+          if (d is Map<String, dynamic>) {
+            final file = (d['file'] as String?) ?? '';
+            final after = (d['after'] as String?) ?? '';
+            if (file.isNotEmpty) buffer.writeln('File: $file');
+            if (after.isNotEmpty) buffer.writeln(after);
+          }
+        }
+      }
+
+      final synthesizedText = buffer.toString().trim();
+      if (synthesizedText.isNotEmpty) {
+        computedParts.add(
+          MessagePartModel(
+            id: 'prt_${DateTime.now().millisecondsSinceEpoch}_summary',
+            messageId: model.id,
+            sessionId: model.sessionId,
+            type: 'text',
+            text: synthesizedText,
+          ),
+        );
+      }
+    }
+
     return ChatMessageModel(
       id: model.id,
       sessionId: model.sessionId,
       role: model.role,
       time: model.time,
       completedTime: completedTime,
-      parts: model.parts,
+      parts: computedParts,
       providerId: model.providerId,
       modelId: model.modelId,
       cost: model.cost,

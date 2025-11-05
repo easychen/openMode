@@ -232,6 +232,7 @@ class ChatProvider extends ChangeNotifier {
   /// 创建新会话
   Future<void> createNewSession({String? parentId, String? title}) async {
     final projectId = projectProvider.currentProjectId;
+    final directory = projectProvider.currentProject?.path;
     _setState(ChatState.loading);
 
     // 生成基于时间的标题
@@ -245,6 +246,7 @@ class ChatProvider extends ChangeNotifier {
           parentId: parentId,
           title: defaultTitle,
         ),
+        directory: directory,
       ),
     );
 
@@ -300,13 +302,14 @@ class ChatProvider extends ChangeNotifier {
 
   /// 加载消息列表
   Future<void> loadMessages(String sessionId) async {
-    if (_currentProjectId == null) return; // 确保有项目ID
-    
+    // 同步项目ID（根据 ProjectProvider），新接口对 projectId 非必需
+    _currentProjectId = projectProvider.currentProjectId;
+
     _setState(ChatState.loading);
 
     final result = await getChatMessages(
       GetChatMessagesParams(
-        projectId: _currentProjectId!,
+        projectId: projectProvider.currentProjectId,
         sessionId: sessionId,
       ),
     );
@@ -322,6 +325,9 @@ class ChatProvider extends ChangeNotifier {
     if (_currentSession == null || text.trim().isEmpty) return;
 
     _setState(ChatState.sending);
+
+    // 同步项目ID（根据 ProjectProvider）
+    _currentProjectId = projectProvider.currentProjectId;
 
     // 生成消息 ID
     final messageId = 'msg_${DateTime.now().millisecondsSinceEpoch}';
@@ -368,7 +374,7 @@ class ChatProvider extends ChangeNotifier {
     _messageSubscription =
         sendChatMessage(
           SendChatMessageParams(
-            projectId: _currentProjectId!,
+            projectId: projectProvider.currentProjectId,
             sessionId: _currentSession!.id, 
             input: input,
           ),
@@ -447,11 +453,12 @@ class ChatProvider extends ChangeNotifier {
 
   /// 删除会话
   Future<void> deleteSession(String sessionId) async {
-    if (_currentProjectId == null) return; // 确保有项目ID
-    
+    // 同步项目ID（根据 ProjectProvider）
+    _currentProjectId = projectProvider.currentProjectId;
+
     final result = await deleteChatSession(
       DeleteChatSessionParams(
-        projectId: _currentProjectId!,
+        projectId: projectProvider.currentProjectId,
         sessionId: sessionId,
       ),
     );
