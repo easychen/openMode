@@ -23,6 +23,10 @@ class DioClient {
 
   void updateBaseUrl(String baseUrl) {
     _dio.options.baseUrl = baseUrl;
+    // Log base URL change for easier debugging during configuration updates
+    if (const bool.fromEnvironment('dart.vm.product') == false) {
+      print('[Dio] Base URL updated: $baseUrl');
+    }
   }
 
   void _setupInterceptors() {

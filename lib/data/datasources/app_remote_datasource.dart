@@ -24,25 +24,40 @@ class AppRemoteDataSourceImpl implements AppRemoteDataSource {
 
   @override
   Future<AppInfoModel> getAppInfo({String? directory}) async {
-    try {
-      final queryParams = directory != null ? {'directory': directory} : <String, dynamic>{};
-      final response = await dio.get('/app/info', queryParameters: queryParams);
-      return AppInfoModel.fromJson(response.data);
-    } catch (e) {
-      print('获取应用信息时出错: $e');
-      // 返回默认的应用信息
-      return AppInfoModel(
-        hostname: 'localhost',
-        git: false,
-        path: AppPathModel(
-          config: '/config',
-          data: '/data',
-          root: '/',
-          cwd: '/app',
-          state: '/state',
-        ),
-      );
-    }
+    // Do NOT swallow network errors here.
+    // Align to OpenAPI: use /path and /config instead of /app/info.
+    // Let Dio throw exceptions so upper layers can handle connection status correctly.
+    final queryParams = directory != null
+        ? {'directory': directory}
+        : <String, dynamic>{};
+
+    // Fetch path info
+    final pathResp = await dio.get('/path', queryParameters: queryParams);
+
+    // Fetch config info (optional for future use)
+    final configResp = await dio.get('/config', queryParameters: queryParams);
+
+    final Map<String, dynamic> pathJson = pathResp.data as Map<String, dynamic>;
+
+    // Map OpenAPI Path schema to AppInfoModel expected structure.
+    // Where exact fields don't exist, provide sensible defaults.
+    final mapped = <String, dynamic>{
+      'hostname': 'OpenCode',
+      'git': false,
+      'path': {
+        'config': pathJson['config'] ?? '',
+        // There is no 'data' in Path schema; use worktree as a reasonable default.
+        'data': pathJson['worktree'] ?? '',
+        // Root is not explicitly defined; use worktree as root.
+        'root': pathJson['worktree'] ?? '',
+        // Use directory as current working directory.
+        'cwd': pathJson['directory'] ?? '',
+        'state': pathJson['state'] ?? '',
+      },
+      'time': null,
+    };
+
+    return AppInfoModel.fromJson(mapped);
   }
 
   @override

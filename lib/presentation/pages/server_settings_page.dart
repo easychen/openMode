@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/api_constants.dart';
+import '../../core/di/injection_container.dart';
+import '../../data/datasources/app_local_datasource.dart';
 
 /// Server settings page
 class ServerSettingsPage extends StatefulWidget {
@@ -23,6 +26,19 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
     final appProvider = context.read<AppProvider>();
     _hostController.text = appProvider.serverHost;
     _portController.text = appProvider.serverPort.toString();
+
+    // Load saved server config from local storage and sync to UI/provider
+    Future.microtask(() async {
+      final local = sl<AppLocalDataSource>();
+      final savedHost = await local.getServerHost();
+      final savedPort = await local.getServerPort();
+      if (savedHost != null && savedPort != null && mounted) {
+        _hostController.text = savedHost;
+        _portController.text = savedPort.toString();
+        // Keep provider state consistent so other parts reflect the same values
+        appProvider.setServerConfig(savedHost, savedPort);
+      }
+    });
   }
 
   @override
@@ -228,13 +244,27 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
     final host = _hostController.text.trim();
     final port = int.parse(_portController.text.trim());
 
+    // On Android emulator, localhost/127.0.0.1 should point to 10.0.2.2
+    // This mapping avoids accidental calls to the host machine's loopback.
+    var mappedHost = host;
+    final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    if (isAndroid && (host == '127.0.0.1' || host.toLowerCase() == 'localhost')) {
+      mappedHost = '10.0.2.2';
+    }
+
     final appProvider = context.read<AppProvider>();
-    final success = await appProvider.updateServerConfig(host, port);
+    final success = await appProvider.updateServerConfig(mappedHost, port);
 
     if (success && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Settings saved')));
+      final info = 'Settings saved: http://$mappedHost:$port';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(info)));
+      if (mappedHost != host && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Android emulator detected: mapped localhost to 10.0.2.2'),
+          ),
+        );
+      }
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

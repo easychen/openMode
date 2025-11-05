@@ -7,14 +7,14 @@ part of 'chat_session_model.dart';
 // **************************************************************************
 
 ChatSessionModel _$ChatSessionModelFromJson(Map<String, dynamic> json) =>
-    ChatSessionModel(
+  ChatSessionModel(
       id: json['id'] as String,
       time: SessionTimeModel.fromJson(json['time'] as Map<String, dynamic>),
       workspaceId: json['workspaceId'] as String?,
       title: json['title'] as String?,
       version: json['version'] as String?,
       shared: json['shared'] as bool? ?? false,
-      summary: json['summary'] as String?,
+      summary: ChatSessionModel._summaryFromJson(json['summary']),
       path: json['path'] == null
           ? null
           : SessionPathModel.fromJson(json['path'] as Map<String, dynamic>),
@@ -116,8 +116,8 @@ SessionCreateInputModel _$SessionCreateInputModelFromJson(
 Map<String, dynamic> _$SessionCreateInputModelToJson(
   SessionCreateInputModel instance,
 ) => <String, dynamic>{
-  'parentID': ?instance.parentId,
-  'title': ?instance.title,
+  'parentID': instance.parentId,
+  'title': instance.title,
 };
 
 SessionUpdateInputModel _$SessionUpdateInputModelFromJson(

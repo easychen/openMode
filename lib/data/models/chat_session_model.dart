@@ -24,6 +24,7 @@ class ChatSessionModel {
   final String? title;
   final String? version;
   final bool shared;
+  @JsonKey(fromJson: _summaryFromJson)
   final String? summary;
   final SessionPathModel? path;
   final SessionShareModel? share;
@@ -32,6 +33,20 @@ class ChatSessionModel {
       _$ChatSessionModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ChatSessionModelToJson(this);
+
+  /// Safely parse summary from API which may return Map or String
+  static String? _summaryFromJson(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is Map<String, dynamic>) {
+      final additions = value['additions'];
+      final deletions = value['deletions'];
+      // Convert to a compact string for display
+      return 'additions: ${additions ?? 0}, deletions: ${deletions ?? 0}';
+    }
+    // Fallback to string conversion
+    return value.toString();
+  }
 
   /// 转换为领域实体
   ChatSession toDomain() {
