@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/chat_provider.dart';
+import 'server_settings_page.dart';
 
 import '../widgets/chat_message_widget.dart';
 import '../widgets/chat_input_widget.dart';
@@ -133,14 +134,23 @@ class _ChatPageState extends State<ChatPage> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ServerSettingsPage(),
+                ),
+              );
+            },
+          ),
           Consumer<ChatProvider>(
             builder: (context, chatProvider, child) {
               return PopupMenuButton<String>(
                 onSelected: (value) async {
                   switch (value) {
-                    case 'back':
-                      Navigator.of(context).pop();
-                      break;
                     case 'new_session':
                       await _createNewSession();
                       break;
@@ -150,17 +160,6 @@ class _ChatPageState extends State<ChatPage> {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'back',
-                    child: Row(
-                      children: [
-                        Icon(Icons.arrow_back),
-                        SizedBox(width: 8),
-                        Text('Back'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
                   const PopupMenuItem(
                     value: 'new_session',
                     child: Row(

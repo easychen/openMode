@@ -23,6 +23,7 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
   final _basicUsernameController = TextEditingController();
   final _basicPasswordController = TextEditingController();
   bool _basicEnabled = false;
+  bool _hasCheckedConnection = false; // Only show status after explicit check/test
 
   @override
   void initState() {
@@ -69,17 +70,18 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
       appBar: AppBar(
         title: const Text('Server Settings'),
         actions: [
-          Consumer<AppProvider>(
-            builder: (context, appProvider, child) {
-              return IconButton(
-                icon: Icon(
-                  appProvider.isConnected ? Icons.cloud_done : Icons.cloud_off,
-                  color: appProvider.isConnected ? Colors.green : Colors.red,
-                ),
-                onPressed: () => _checkConnection(),
-              );
-            },
-          ),
+          if (_hasCheckedConnection)
+            Consumer<AppProvider>(
+              builder: (context, appProvider, child) {
+                return IconButton(
+                  icon: Icon(
+                    appProvider.isConnected ? Icons.cloud_done : Icons.cloud_off,
+                    color: appProvider.isConnected ? Colors.green : Colors.red,
+                  ),
+                  onPressed: () => _checkConnection(),
+                );
+              },
+            ),
         ],
       ),
       resizeToAvoidBottomInset: true,
@@ -95,65 +97,66 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              // Connection status card
-              Consumer<AppProvider>(
-                builder: (context, appProvider, child) {
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(
-                        AppConstants.defaultPadding,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                appProvider.isConnected
-                                    ? Icons.check_circle
-                                    : Icons.error,
-                                color: appProvider.isConnected
-                                    ? Colors.green
-                                    : Colors.red,
-                              ),
-                              const SizedBox(width: AppConstants.smallPadding),
+              // Connection status card (only visible after explicit test/check)
+              if (_hasCheckedConnection)
+                Consumer<AppProvider>(
+                  builder: (context, appProvider, child) {
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(
+                          AppConstants.defaultPadding,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  appProvider.isConnected
+                                      ? Icons.check_circle
+                                      : Icons.error,
+                                  color: appProvider.isConnected
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                                const SizedBox(width: AppConstants.smallPadding),
+                                Text(
+                                  appProvider.isConnected
+                                      ? 'Connected'
+                                      : 'Disconnected',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                              ],
+                            ),
+                            if (!appProvider.isConnected &&
+                                appProvider.errorMessage.isNotEmpty) ...[
+                              const SizedBox(height: AppConstants.smallPadding),
                               Text(
-                                appProvider.isConnected
-                                    ? 'Connected'
-                                    : 'Disconnected',
-                                style: Theme.of(context).textTheme.titleMedium,
+                                appProvider.errorMessage,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
-                          ),
-                          if (!appProvider.isConnected &&
-                              appProvider.errorMessage.isNotEmpty) ...[
-                            const SizedBox(height: AppConstants.smallPadding),
-                            Text(
-                              appProvider.errorMessage,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                                fontSize: 12,
+                            if (appProvider.isConnected &&
+                                appProvider.appInfo != null) ...[
+                              const SizedBox(height: AppConstants.smallPadding),
+                              Text(
+                                'Host: ${appProvider.appInfo!.hostname}',
+                                style: Theme.of(context).textTheme.bodySmall,
                               ),
-                            ),
+                              Text(
+                                'Working Directory: ${appProvider.appInfo!.path.cwd}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
                           ],
-                          if (appProvider.isConnected &&
-                              appProvider.appInfo != null) ...[
-                            const SizedBox(height: AppConstants.smallPadding),
-                            Text(
-                              'Host: ${appProvider.appInfo!.hostname}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              'Working Directory: ${appProvider.appInfo!.path.cwd}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
 
               const SizedBox(height: AppConstants.defaultPadding),
 
@@ -376,6 +379,9 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
     // Then test connection
     final appProvider = context.read<AppProvider>();
     await appProvider.getAppInfo();
+    setState(() {
+      _hasCheckedConnection = true;
+    });
 
     if (mounted) {
       if (appProvider.isConnected) {
@@ -400,6 +406,9 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
   void _checkConnection() async {
     final appProvider = context.read<AppProvider>();
     await appProvider.checkConnection();
+    setState(() {
+      _hasCheckedConnection = true;
+    });
 
     if (mounted) {
       final message = appProvider.isConnected
