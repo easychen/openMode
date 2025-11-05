@@ -57,6 +57,24 @@ abstract class AppLocalDataSource {
   /// 保存会话列表到缓存
   Future<void> saveCachedSessions(String sessionsJson);
 
+  /// 获取是否启用 Basic 认证
+  Future<bool?> getBasicAuthEnabled();
+
+  /// 保存是否启用 Basic 认证
+  Future<void> saveBasicAuthEnabled(bool enabled);
+
+  /// 获取 Basic 认证用户名
+  Future<String?> getBasicAuthUsername();
+
+  /// 保存 Basic 认证用户名
+  Future<void> saveBasicAuthUsername(String username);
+
+  /// 获取 Basic 认证密码
+  Future<String?> getBasicAuthPassword();
+
+  /// 保存 Basic 认证密码
+  Future<void> saveBasicAuthPassword(String password);
+
   /// 清除所有数据
   Future<void> clearAll();
 }
@@ -158,6 +176,36 @@ class AppLocalDataSourceImpl implements AppLocalDataSource {
   @override
   Future<void> saveCachedSessions(String sessionsJson) async {
     await sharedPreferences.setString(AppConstants.cachedSessionsKey, sessionsJson);
+  }
+
+  @override
+  Future<bool?> getBasicAuthEnabled() async {
+    return sharedPreferences.getBool(AppConstants.basicAuthEnabledKey);
+  }
+
+  @override
+  Future<void> saveBasicAuthEnabled(bool enabled) async {
+    await sharedPreferences.setBool(AppConstants.basicAuthEnabledKey, enabled);
+  }
+
+  @override
+  Future<String?> getBasicAuthUsername() async {
+    return sharedPreferences.getString(AppConstants.basicAuthUsernameKey);
+  }
+
+  @override
+  Future<void> saveBasicAuthUsername(String username) async {
+    await sharedPreferences.setString(AppConstants.basicAuthUsernameKey, username);
+  }
+
+  @override
+  Future<String?> getBasicAuthPassword() async {
+    return sharedPreferences.getString(AppConstants.basicAuthPasswordKey);
+  }
+
+  @override
+  Future<void> saveBasicAuthPassword(String password) async {
+    await sharedPreferences.setString(AppConstants.basicAuthPasswordKey, password);
   }
 
   @override

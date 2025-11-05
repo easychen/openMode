@@ -124,4 +124,18 @@ Future<void> _loadLocalConfig() async {
     final baseUrl = 'http://$host:$port';
     dioClient.updateBaseUrl(baseUrl);
   }
+
+  // Load Basic auth configuration
+  final basicEnabled = await localDataSource.getBasicAuthEnabled();
+  if (basicEnabled == true) {
+    final username = await localDataSource.getBasicAuthUsername();
+    final password = await localDataSource.getBasicAuthPassword();
+    if ((username != null && username.isNotEmpty) &&
+        (password != null && password.isNotEmpty)) {
+      dioClient.setBasicAuth(username, password);
+    }
+  } else {
+    // Ensure no leftover auth header when disabled
+    dioClient.clearAuth();
+  }
 }

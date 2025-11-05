@@ -18,6 +18,11 @@ class AppConstants {
   static const String cachedSessionsKey = 'cached_sessions';
   static const String currentSessionIdKey = 'current_session_id';
 
+  // Basic auth storage keys
+  static const String basicAuthEnabledKey = 'basic_auth_enabled';
+  static const String basicAuthUsernameKey = 'basic_auth_username';
+  static const String basicAuthPasswordKey = 'basic_auth_password';
+
   // Default configuration
   static const String defaultTheme = 'system';
   static const int maxMessageLength = 10000;

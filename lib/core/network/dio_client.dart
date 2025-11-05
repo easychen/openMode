@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import '../constants/api_constants.dart';
+import 'dart:convert';
 
 /// Dio HTTP客户端配置
 class DioClient {
   late final Dio _dio;
+  String? _basicAuthHeader; // cached Authorization header
 
   DioClient({String? baseUrl}) {
     _dio = Dio(
@@ -29,13 +31,35 @@ class DioClient {
     }
   }
 
+  /// Set Basic Authorization header using username and password
+  void setBasicAuth(String username, String password) {
+    final credentials = '$username:$password';
+    final encoded = base64Encode(utf8.encode(credentials));
+    _basicAuthHeader = 'Basic $encoded';
+    _dio.options.headers[ApiConstants.authorization] = _basicAuthHeader!;
+    if (const bool.fromEnvironment('dart.vm.product') == false) {
+      print('[Dio] Basic auth header set');
+    }
+  }
+
+  /// Clear Authorization header
+  void clearAuth() {
+    _basicAuthHeader = null;
+    _dio.options.headers.remove(ApiConstants.authorization);
+    if (const bool.fromEnvironment('dart.vm.product') == false) {
+      print('[Dio] Authorization header cleared');
+    }
+  }
+
   void _setupInterceptors() {
     _dio.interceptors.add(
       LogInterceptor(
+        requestHeader: true,
         requestBody: true,
+        responseHeader: false,
         responseBody: true,
         logPrint: (object) {
-          // 在调试模式下打印日志
+          // Print logs in debug mode only
           if (const bool.fromEnvironment('dart.vm.product') == false) {
             print(object);
           }
@@ -47,7 +71,11 @@ class DioClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          // 可以在这里添加认证头等
+          // Ensure Authorization header is present if configured
+          if (_basicAuthHeader != null &&
+              (options.headers[ApiConstants.authorization] == null)) {
+            options.headers[ApiConstants.authorization] = _basicAuthHeader;
+          }
           handler.next(options);
         },
         onResponse: (response, handler) {

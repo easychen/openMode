@@ -6,6 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/di/injection_container.dart';
 import '../../data/datasources/app_local_datasource.dart';
+import '../../core/network/dio_client.dart';
 
 /// Server settings page
 class ServerSettingsPage extends StatefulWidget {
@@ -19,6 +20,9 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
   final _formKey = GlobalKey<FormState>();
   final _hostController = TextEditingController();
   final _portController = TextEditingController();
+  final _basicUsernameController = TextEditingController();
+  final _basicPasswordController = TextEditingController();
+  bool _basicEnabled = false;
 
   @override
   void initState() {
@@ -32,11 +36,20 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
       final local = sl<AppLocalDataSource>();
       final savedHost = await local.getServerHost();
       final savedPort = await local.getServerPort();
+      final savedBasicEnabled = await local.getBasicAuthEnabled();
+      final savedUsername = await local.getBasicAuthUsername();
+      final savedPassword = await local.getBasicAuthPassword();
       if (savedHost != null && savedPort != null && mounted) {
         _hostController.text = savedHost;
         _portController.text = savedPort.toString();
         // Keep provider state consistent so other parts reflect the same values
         appProvider.setServerConfig(savedHost, savedPort);
+      }
+      if (mounted) {
+        _basicEnabled = savedBasicEnabled ?? false;
+        _basicUsernameController.text = savedUsername ?? '';
+        _basicPasswordController.text = savedPassword ?? '';
+        setState(() {});
       }
     });
   }
@@ -45,6 +58,8 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
   void dispose() {
     _hostController.dispose();
     _portController.dispose();
+    _basicUsernameController.dispose();
+    _basicPasswordController.dispose();
     super.dispose();
   }
 
@@ -67,13 +82,19 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
           ),
         ],
       ),
+      resizeToAvoidBottomInset: true,
       body: Padding(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: AppConstants.defaultPadding +
+                  MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Connection status card
               Consumer<AppProvider>(
                 builder: (context, appProvider, child) {
@@ -195,6 +216,56 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
                         onPressed: _resetToDefault,
                         child: const Text('Reset to Default'),
                       ),
+
+                      const SizedBox(height: AppConstants.defaultPadding),
+
+                      // Basic authentication section
+                      SwitchListTile(
+                        value: _basicEnabled,
+                        onChanged: (val) {
+                          setState(() {
+                            _basicEnabled = val;
+                          });
+                        },
+                        title: const Text('Enable Basic Authentication'),
+                        subtitle: const Text(
+                          'If enabled, requests will include Basic Authorization header.',
+                        ),
+                      ),
+
+                      if (_basicEnabled) ...[
+                        const SizedBox(height: AppConstants.smallPadding),
+                        TextFormField(
+                          controller: _basicUsernameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                            prefixIcon: Icon(Icons.person_outline),
+                          ),
+                          validator: (value) {
+                            if (!_basicEnabled) return null;
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter username';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: AppConstants.smallPadding),
+                        TextFormField(
+                          controller: _basicPasswordController,
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.lock_outline),
+                          ),
+                          obscureText: true,
+                          validator: (value) {
+                            if (!_basicEnabled) return null;
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter password';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -231,6 +302,7 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
                 ],
               ),
             ],
+            ),
           ),
         ),
       ),
@@ -256,12 +328,31 @@ class _ServerSettingsPageState extends State<ServerSettingsPage> {
     final success = await appProvider.updateServerConfig(mappedHost, port);
 
     if (success && mounted) {
+      // Save Basic auth settings
+      final local = sl<AppLocalDataSource>();
+      await local.saveBasicAuthEnabled(_basicEnabled);
+      await local.saveBasicAuthUsername(_basicUsernameController.text.trim());
+      await local.saveBasicAuthPassword(_basicPasswordController.text.trim());
+
+      // Apply to Dio client
+      final dioClient = sl<DioClient>();
+      if (_basicEnabled &&
+          _basicUsernameController.text.trim().isNotEmpty &&
+          _basicPasswordController.text.trim().isNotEmpty) {
+        dioClient.setBasicAuth(
+          _basicUsernameController.text.trim(),
+          _basicPasswordController.text.trim(),
+        );
+      } else {
+        dioClient.clearAuth();
+      }
+
       final info = 'Settings saved: http://$mappedHost:$port';
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(info)));
       if (mappedHost != host && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Android emulator detected: mapped localhost to 10.0.2.2'),
+          content: Text('Android emulator detected: mapped localhost to 10.0.2.2'),
           ),
         );
       }
